@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rugby Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d0f14; --bg2:#13161d; --bg3:#1a1e28; --bg4:#222636;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text:#e8eaf0; --muted:#7a7f96;
+  --p1:#c8f53a; --p1bg:rgba(200,245,58,0.12); --p1dim:rgba(200,245,58,0.06);
+  --p2:#3ab4f5; --p2bg:rgba(58,180,245,0.12);
+  --p3:#f5a03a; --p3bg:rgba(245,160,58,0.12);
+  --win:#3af5a0; --loss:#f53a6e; --draw:#f5a03a;
+  --live:#f53a6e;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:100;}
+.hdr-l{display:flex;align-items:center;gap:12px;}
+.logo{width:36px;height:36px;background:var(--p1);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;color:#0d0f14;}
+.hdr h1{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;}
+.hdr h1 span{color:var(--p1);}
+.hdr-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:1px;}
+.hdr-r{display:flex;align-items:center;gap:10px;}
+.updated{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+.btn-ref{background:var(--p1);color:#0d0f14;border:none;border-radius:6px;padding:7px 14px;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:opacity .2s;}
+.btn-ref:hover{opacity:.85;}
+.btn-ref.loading{opacity:.5;pointer-events:none;}
+
+/* PRIO NAV */
+.pnav{display:flex;align-items:center;gap:4px;padding:8px 24px;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto;flex-wrap:nowrap;}
+.ptab{padding:5px 14px;border-radius:6px;border:1px solid transparent;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;background:none;color:var(--muted);transition:all .15s;}
+.ptab:hover{color:var(--text);background:var(--bg3);}
+.ptab.p1.active{background:var(--p1);color:#0d0f14;border-color:var(--p1);}
+.ptab.p2.active{background:var(--p2bg);color:var(--p2);border-color:rgba(58,180,245,0.3);}
+.ptab.p3.active{background:var(--p3bg);color:var(--p3);border-color:rgba(245,160,58,0.3);}
+.pdiv{width:1px;height:16px;background:var(--border2);margin:0 4px;flex-shrink:0;}
+
+/* MAIN */
+.main{padding:18px 24px;max-width:1400px;}
+.section{display:none;}
+.section.active{display:block;}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;justify-content:space-between;margin:20px 0 12px;}
+.sh:first-child{margin-top:0;}
+.sh-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--muted);display:flex;align-items:center;gap:7px;}
+.sh-dot{width:7px;height:7px;border-radius:50%;background:var(--p1);display:inline-block;flex-shrink:0;}
+.sh-dot.p2{background:var(--p2);}
+.sh-dot.p3{background:var(--p3);}
+.sh-link{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-decoration:none;border:1px solid var(--border2);padding:3px 8px;border-radius:4px;}
+.sh-link:hover{color:var(--text);border-color:var(--border2);}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr;}}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
+.card.p1-accent{border-top:2px solid var(--p1);}
+.card.p2-accent{border-top:2px solid var(--p2);}
+.card.p3-accent{border-top:2px solid var(--p3);}
+.ch{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:space-between;}
+.ct{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;display:flex;align-items:center;gap:6px;}
+.cs{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+
+/* INNER TABS */
+.itabs{display:flex;border-bottom:1px solid var(--border);}
+.itab{padding:7px 12px;font-size:12px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:all .15s;white-space:nowrap;}
+.itab:hover{color:var(--text);}
+.itab.active{color:var(--p1);border-bottom-color:var(--p1);}
+.itab.p2.active{color:var(--p2);border-bottom-color:var(--p2);}
+.itab.p3.active{color:var(--p3);border-bottom-color:var(--p3);}
+.icp{display:none;}
+.icp.active{display:block;}
+
+/* MATCH ROW */
+.mr{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);gap:6px;cursor:default;transition:background .1s;}
+.mr:last-child{border-bottom:none;}
+.mr:hover{background:var(--bg3);}
+.th{text-align:right;}
+.ta{text-align:left;}
+.tn{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tn.w{color:var(--win);font-weight:600;}
+.sb{text-align:center;min-width:76px;}
+.sm{font-family:'Bebas Neue',sans-serif;font-size:21px;letter-spacing:2px;line-height:1;}
+.sm.live{color:var(--live);}
+.ss{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);margin-top:1px;}
+.ss.live{color:var(--live);}
+.ss.up{color:var(--p3);}
+.svs{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted);}
+.ldot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--live);animation:pulse 1.2s ease-in-out infinite;margin-right:3px;vertical-align:middle;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.spin{animation:spin 1s linear infinite;}
+
+/* STANDINGS */
+.stbl{width:100%;border-collapse:collapse;}
+.stbl th{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:7px 5px 5px;border-bottom:1px solid var(--border);font-weight:400;letter-spacing:.5px;}
+.stbl th:first-child,.stbl th:nth-child(2){text-align:left;}
+.stbl th:first-child{padding-left:14px;width:36px;}
+.stbl th:nth-child(2){padding-left:4px;}
+.stbl td{padding:7px 5px;text-align:center;font-size:13px;border-bottom:1px solid var(--border);color:var(--text);}
+.stbl tr:last-child td{border-bottom:none;}
+.stbl tr:hover td{background:var(--bg3);}
+.stbl td:first-child{padding-left:14px;}
+.stbl td:nth-child(2){text-align:left;font-weight:500;}
+.pos{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--muted);background:var(--bg4);}
+.pos.q{background:var(--p1bg);color:var(--p1);}
+.pos.q2{background:rgba(200,245,58,.25);color:var(--p1);}
+.pts{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--p1);}
+.pts.p2c{color:var(--p2);}
+.pts.p3c{color:var(--p3);}
+
+/* FIXTURE ROW */
+.fr{display:grid;grid-template-columns:54px 1fr;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);gap:10px;}
+.fr:last-child{border-bottom:none;}
+.fd{text-align:center;background:var(--bg4);border-radius:5px;padding:4px 0;}
+.fd-d{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text);line-height:1;}
+.fd-m{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.fm{font-size:13px;font-weight:500;}
+.fc{font-size:11px;color:var(--muted);margin-top:1px;}
+
+/* STATS BANNER */
+.banner{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.tile{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.tl{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.5px;}
+.tv{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--p1);line-height:1.1;margin-top:2px;}
+.ts{font-size:11px;color:var(--muted);margin-top:1px;}
+@media(max-width:700px){.banner{grid-template-columns:repeat(2,1fr);}}
+
+/* SEVENS CIRCUIT */
+.cr{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border);gap:8px;}
+.cr:last-child{border-bottom:none;}
+.ce{font-size:13px;font-weight:500;}
+.cm{font-size:11px;color:var(--muted);margin-top:1px;}
+.cst{font-size:11px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:4px;white-space:nowrap;}
+.cst.done{background:var(--bg4);color:var(--muted);}
+.cst.next{background:var(--p1bg);color:var(--p1);border:1px solid rgba(200,245,58,.3);}
+.cst.soon{background:var(--p3bg);color:var(--p3);border:1px solid rgba(245,160,58,.3);}
+
+/* LEADERS */
+.ldrs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);}
+.lc{background:var(--bg3);border-radius:7px;padding:10px;text-align:center;border:1px solid var(--border);}
+.lr{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.lt{font-weight:500;font-size:13px;margin:3px 0 2px;}
+.lp{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--p2);line-height:1;}
+.lpl{font-size:10px;color:var(--muted);}
+
+/* NEWS */
+.nw{padding:9px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
+.nw:last-child{border-bottom:none;}
+.nw:hover{background:var(--bg3);}
+.nwt{font-size:13px;font-weight:500;color:var(--text);line-height:1.35;}
+.nwm{font-size:11px;color:var(--muted);margin-top:3px;display:flex;gap:8px;}
+.nwbadge{font-size:10px;font-family:'DM Mono',monospace;padding:2px 6px;border-radius:3px;background:var(--bg4);color:var(--muted);}
+
+/* LOADING/EMPTY */
+.ld{padding:24px;text-align:center;color:var(--muted);font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.ldspn{border:2px solid var(--border2);border-top-color:var(--p1);width:14px;height:14px;border-radius:50%;}
+.empty{padding:16px;text-align:center;color:var(--muted);font-size:12px;}
+.err{padding:12px 14px;font-size:12px;color:var(--muted);border-top:1px solid var(--border);}
+
+/* FOOTER */
+.ftr{padding:14px 24px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;display:flex;justify-content:space-between;margin-top:28px;}
+
+/* PRIO LABEL */
+.prio-label{font-size:10px;font-family:'DM Mono',monospace;padding:2px 7px;border-radius:3px;margin-left:6px;}
+.prio-label.p1{background:var(--p1bg);color:var(--p1);}
+.prio-label.p2{background:var(--p2bg);color:var(--p2);}
+.prio-label.p3{background:var(--p3bg);color:var(--p3);}
+
+/* WORLD RANKING PTS color */
+.wrpts{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--p2);}
+
+/* source link small */
+.srclink{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-decoration:none;}
+.srclink:hover{color:var(--text);}
+
+/* LOGO SETUP MODAL */
+.setup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.setup-box{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px;max-width:520px;width:90%;}
+.setup-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--p1);margin-bottom:6px;}
+.setup-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5;}
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.setup-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s;position:relative;overflow:hidden;}
+.setup-item:hover{border-color:var(--border2);}
+.setup-item.done{border-color:rgba(58,245,160,.4);}
+.setup-item .si-preview{width:28px;height:28px;object-fit:contain;border-radius:4px;flex-shrink:0;}
+.setup-item .si-placeholder{width:28px;height:28px;border-radius:4px;background:var(--bg4);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;}
+.setup-item .si-label{font-size:12px;font-weight:500;color:var(--text);}
+.setup-item .si-status{font-size:10px;color:var(--muted);margin-top:1px;font-family:'DM Mono',monospace;}
+.setup-item .si-status.ok{color:var(--win);}
+.setup-item input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.setup-actions{display:flex;gap:8px;justify-content:flex-end;}
+.btn-setup-skip{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;}
+.btn-setup-skip:hover{color:var(--text);}
+.btn-setup-done{background:var(--p1);color:#0d0f14;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;}
+.setup-progress{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-right:auto;align-self:center;}
+</style>
+</head>
+<body>
+
+<!-- LOGO SETUP MODAL -->
+<div class="setup-overlay" id="setupOverlay" style="display:none;">
+  <div class="setup-box">
+    <div class="setup-title">🏉 Logo Setup</div>
+    <div class="setup-sub">Lade einmalig die Turnierlogos von ultimaterugby.com hoch – sie werden dauerhaft im Browser gespeichert und müssen nie wieder importiert werden.</div>
+    <div class="setup-grid" id="setupGrid"></div>
+    <div class="setup-actions">
+      <div class="setup-progress" id="setupProgress">0 / 13 geladen</div>
+      <button class="btn-setup-skip" onclick="skipSetup()">Überspringen</button>
+      <button class="btn-setup-done" onclick="finishSetup()">Fertig & Speichern</button>
+    </div>
+  </div>
+</div>
+
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="logo">RD</div>
+    <div>
+      <h1>RUGBY <span>DASHBOARD</span></h1>
+      <div class="hdr-sub">Union · Sevens · Persönliches Sport-Informationssystem</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <div class="updated" id="upd">Noch nicht geladen</div>
+    <button class="btn-ref" id="refBtn" onclick="loadAll()">
+      <svg id="refIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      Aktualisieren
+    </button>
+    <button class="btn-ref" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border2);" onclick="openSetup()" title="Logos einrichten">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Logos
+    </button>
+  </div>
+</div>
+
+<style>
+/* LOGO TABS */
+.ptab-logo {
+  display:flex; align-items:center; gap:5px;
+  padding:4px 10px; border-radius:6px; border:1px solid transparent;
+  font-size:11px; font-weight:500; cursor:pointer; white-space:nowrap;
+  background:none; color:var(--muted); transition:all .15s;
+}
+.ptab-logo:hover { color:var(--text); background:var(--bg3); }
+.ptab-logo .lbadge {
+  width:18px; height:18px; object-fit:contain; border-radius:2px;
+  opacity:.6; transition:opacity .15s; flex-shrink:0;
+}
+.ptab-logo .ltxt { line-height:1; }
+.ptab-logo.p1.active { background:var(--p1bg); color:var(--p1); border-color:rgba(200,245,58,0.25); }
+.ptab-logo.p1.active .lbadge { opacity:1; }
+.ptab-logo.p2.active { background:var(--p2bg); color:var(--p2); border-color:rgba(58,180,245,0.25); }
+.ptab-logo.p2.active .lbadge { opacity:1; }
+.ptab-logo.p3.active { background:var(--p3bg); color:var(--p3); border-color:rgba(245,160,58,0.25); }
+.ptab-logo.p3.active .lbadge { opacity:1; }
+/* fallback text badge when no img */
+.ptab-logo .ltxt-badge {
+  width:18px; height:18px; border-radius:3px; display:flex; align-items:center;
+  justify-content:center; font-size:8px; font-weight:700; flex-shrink:0;
+  background:var(--bg4); color:var(--muted); letter-spacing:0;
+}
+</style>
+
+<div class="pnav">
+  <!-- Prio 1 -->
+  <button class="ptab-logo p1 active" onclick="show('testRugby')" data-logo-key="testRugby">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/351180-d4faf5bb3c-3/ZVwKqVO3_400x400.jpg">
+    <span class="ltxt">Test Rugby</span>
+  </button>
+  <button class="ptab-logo p1" onclick="show('6nations')" data-logo-key="6nations">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/360345-b0b36f45d5-3/6nations.jpg">
+    <span class="ltxt">Six Nations</span>
+  </button>
+  <button class="ptab-logo p1" onclick="show('nc2026')" data-logo-key="nc2026">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/353714-8ddb7bd943-3/Screenshot2025-11-17112643.jpg">
+    <span class="ltxt">Nations Champ.</span>
+  </button>
+  <button class="ptab-logo p1" onclick="show('trc')" data-logo-key="trc">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/362489-98c0215757-3/TRC.jpg">
+    <span class="ltxt">Rugby Champ.</span>
+  </button>
+  <button class="ptab-logo p1" onclick="show('rwc')" data-logo-key="rwc">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/325296-925b26085d-3/RWC2027Logo.jpg">
+    <span class="ltxt">RWC 2027</span>
+  </button>
+  <div class="pdiv"></div>
+  <!-- Prio 2 -->
+  <button class="ptab-logo p2" onclick="show('urc')" data-logo-key="urc">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/338731-fae2983d3a-3/unnamed.jpg">
+    <span class="ltxt">URC</span>
+  </button>
+  <button class="ptab-logo p2" onclick="show('prem')" data-logo-key="prem">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/343521-70887783bc-3/2PBgulm5_400x400.jpg">
+    <span class="ltxt">Premiership</span>
+  </button>
+  <button class="ptab-logo p2" onclick="show('top14')" data-logo-key="top14">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/341850-49bd7a92c7-3/image.jpg">
+    <span class="ltxt">Top 14</span>
+  </button>
+  <button class="ptab-logo p2" onclick="show('prod2')" data-logo-key="prod2">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/341851-1ee3fac570-3/ProD2Logo.jpg">
+    <span class="ltxt">Pro D2</span>
+  </button>
+  <button class="ptab-logo p2" onclick="show('superrugby')" data-logo-key="superrugby">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/345131-b568b4827a-3/Super_Rugby_Pacific_logo.jpg">
+    <span class="ltxt">Super Rugby</span>
+  </button>
+  <button class="ptab-logo p2" onclick="show('svns')" data-logo-key="svns">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/345618-813994c18e-3/World7sLogo.jpg">
+    <span class="ltxt">SVNS</span>
+  </button>
+  <div class="pdiv"></div>
+  <!-- Prio 3 -->
+  <button class="ptab-logo p3" onclick="show('ecc')" data-logo-key="ecc">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/350608-70e5798532-3/vcSAuYKk_400x400.jpg">
+    <span class="ltxt">Champ. Cup</span>
+  </button>
+  <button class="ptab-logo p3" onclick="show('challenge')" data-logo-key="challenge">
+    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/350609-1ebb7d8b05-3/Otikwf_N_400x400.jpg">
+    <span class="ltxt">Challenge Cup</span>
+  </button>
+</div>
+
+<!-- ===================== SECTIONS ===================== -->
+
+<!-- TEST RUGBY (Overview) -->
+<div class="main section active" id="sec-testRugby">
+  <div class="banner" id="testBanner">
+    <div class="tile"><div class="tl">NÄCHSTES TEST</div><div class="tv" id="tb-next" style="font-size:16px;padding-top:4px;">–</div><div class="ts" id="tb-next-sub">–</div></div>
+    <div class="tile"><div class="tl">WR RANKING #1</div><div class="tv" id="tb-r1">RSA</div><div class="ts">Südafrika</div></div>
+    <div class="tile"><div class="tl">AKTIVE SERIES</div><div class="tv">3</div><div class="ts">Laufende Turniere</div></div>
+    <div class="tile"><div class="tl">RWC 2027</div><div class="tv" style="font-size:18px;padding-top:4px;">AUS</div><div class="ts">438 Tage</div></div>
+  </div>
+  <div class="sh"><div class="sh-title"><span class="sh-dot"></span>World Rugby Rankings <span class="prio-label p1">PRIO 1</span></div><a class="sh-link" href="https://www.world.rugby/rankings/mru" target="_blank">world.rugby ↗</a></div>
+  <div class="g2">
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">Top 10 – Men</div><div class="cs" id="wr-date">Stand: Mai 2026</div></div>
+      <div id="wr-men"></div>
+    </div>
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">Letzte Test Matches</div><div class="cs" id="test-date">–</div></div>
+      <div id="test-results"><div class="ld"><div class="ldspn spin"></div>Lade...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SIX NATIONS -->
+<div class="main section" id="sec-6nations">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot"></span>Six Nations <span class="prio-label p1">PRIO 1</span></div><a class="sh-link" href="https://www.ultimaterugby.com/six-nations-2026" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="g2">
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">Tabelle 2026</div><div class="cs" id="6n-date">–</div></div>
+      <div id="6n-table"><div class="ld"><div class="ldspn spin"></div>Lade...</div></div>
+    </div>
+    <div class="card p1-accent">
+      <div class="itabs" id="6n-tabs">
+        <button class="itab active" onclick="switchTab('6n','results')">Ergebnisse</button>
+        <button class="itab" onclick="switchTab('6n','fixtures')">Fixtures</button>
+      </div>
+      <div id="6n-results" class="icp active"><div class="ld"><div class="ldspn spin"></div>Lade...</div></div>
+      <div id="6n-fixtures" class="icp"><div class="ld"><div class="ldspn spin"></div>Lade...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- NATIONS CHAMPIONSHIP 2026 -->
+<div class="main section" id="sec-nc2026">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot"></span>Nations Championship 2026 <span class="prio-label p1">PRIO 1</span></div><a class="sh-link" href="https://www.ultimaterugby.com/nations-championship-2026" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="g2">
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">Tabelle</div><div class="cs" id="nc-date">–</div></div>
+      <div id="nc-table"><div class="ld"><div class="ldspn spin"></div>Lade...</div></div>
+    </div>
+    <div class="card p1-accent">
+      <div class="itabs">
+        <button class="itab active" onclick="switchTab('nc','results')">Ergebnisse</button>
+        <button class="itab" onclick="switchTab('nc','fixtures')">Fixtures</button>
+      </div>
+      <div id="nc-results" class="icp active"><div class="ld"><div class="ldspn spin"></div>Lade...</div></div>
+      <div id="nc-fixtures" class="icp"><div class="ld"><div class="ldspn spin"></div>Lade...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- RUGBY CHAMPIONSHIP -->
+<div class="main section" id="sec-trc">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot"></span>The Rugby Championship <span class="prio-label p1">PRIO 1</span></div><a class="sh-link" href="https://www.ultimaterugby.com/rugby-championship-2026" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="g2">
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">Tabelle 2026</div><div class="cs" id="trc-date">–</div></div>
+      <div id="trc-table"><div class="ld"><div class="ldspn spin"></div>Lade...</div></div>
+    </div>
+    <div class="card p1-accent">
+      <div class="itabs">
+        <button class="itab active" onclick="switchTab('trc','results')">Ergebnisse</button>
+        <button class="itab" onclick="switchTab('trc','fixtures')">Fixtures</button>
+      </div>
+      <div id="trc-results" class="icp active"><div class="ld"><div class="ldspn spin"></div>Lade...</div></div>
+      <div id="trc-fixtures" class="icp"><div class="ld"><div class="ldspn spin"></div>Lade...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- RWC 2027 -->
+<div class="main section" id="sec-rwc">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot"></span>Rugby World Cup 2027 <span class="prio-label p1">PRIO 1</span></div><a class="sh-link" href="https://www.ultimaterugby.com/rugby-world-cup-2027-qualification" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="g2">
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">Qualifikation – Übersicht</div><div class="cs">Australien 2027</div></div>
+      <div id="rwc-quali"></div>
+    </div>
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">Letzte Quali-Spiele</div><div class="cs" id="rwc-date">–</div></div>
+      <div id="rwc-results"><div class="ld"><div class="ldspn spin"></div>Lade...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- URC -->
+<div class="main section" id="sec-urc">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p2"></span>United Rugby Championship <span class="prio-label p2">PRIO 2</span></div><a class="sh-link" href="https://www.ultimaterugby.com/urc-2025%2F26" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="g2">
+    <div class="card p2-accent">
+      <div class="ch"><div class="ct">Tabelle 2025/26</div><div class="cs" id="urc-date">–</div></div>
+      <div id="urc-table"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+    </div>
+    <div class="card p2-accent">
+      <div class="itabs">
+        <button class="itab p2 active" onclick="switchTab('urc','results')">Ergebnisse</button>
+        <button class="itab p2" onclick="switchTab('urc','fixtures')">Fixtures</button>
+      </div>
+      <div id="urc-results" class="icp active"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+      <div id="urc-fixtures" class="icp"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PREMIERSHIP -->
+<div class="main section" id="sec-prem">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p2"></span>Gallagher Premiership <span class="prio-label p2">PRIO 2</span></div><a class="sh-link" href="https://www.ultimaterugby.com/premiership-rugby-2025%2F26" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="g2">
+    <div class="card p2-accent">
+      <div class="ch"><div class="ct">Tabelle 2025/26</div><div class="cs" id="prem-date">–</div></div>
+      <div id="prem-table"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+    </div>
+    <div class="card p2-accent">
+      <div class="itabs">
+        <button class="itab p2 active" onclick="switchTab('prem','results')">Ergebnisse</button>
+        <button class="itab p2" onclick="switchTab('prem','fixtures')">Fixtures</button>
+      </div>
+      <div id="prem-results" class="icp active"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+      <div id="prem-fixtures" class="icp"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOP 14 -->
+<div class="main section" id="sec-top14">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p2"></span>Top 14 <span class="prio-label p2">PRIO 2</span></div><a class="sh-link" href="https://www.ultimaterugby.com/top-14-2025%2F26" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="g2">
+    <div class="card p2-accent">
+      <div class="ch"><div class="ct">Tabelle 2025/26</div><div class="cs" id="t14-date">–</div></div>
+      <div id="t14-table"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+    </div>
+    <div class="card p2-accent">
+      <div class="itabs">
+        <button class="itab p2 active" onclick="switchTab('t14','results')">Ergebnisse</button>
+        <button class="itab p2" onclick="switchTab('t14','fixtures')">Fixtures</button>
+      </div>
+      <div id="t14-results" class="icp active"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+      <div id="t14-fixtures" class="icp"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRO D2 -->
+<div class="main section" id="sec-prod2">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p2"></span>Pro D2 <span class="prio-label p2">PRIO 2</span></div><a class="sh-link" href="https://www.ultimaterugby.com/pro-d-2-2025%2F26" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="g2">
+    <div class="card p2-accent">
+      <div class="ch"><div class="ct">Tabelle 2025/26</div><div class="cs" id="pd2-date">–</div></div>
+      <div id="pd2-table"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+    </div>
+    <div class="card p2-accent">
+      <div class="itabs">
+        <button class="itab p2 active" onclick="switchTab('pd2','results')">Ergebnisse</button>
+        <button class="itab p2" onclick="switchTab('pd2','fixtures')">Fixtures</button>
+      </div>
+      <div id="pd2-results" class="icp active"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+      <div id="pd2-fixtures" class="icp"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUPER RUGBY -->
+<div class="main section" id="sec-superrugby">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p2"></span>Super Rugby Pacific <span class="prio-label p2">PRIO 2</span></div><a class="sh-link" href="https://www.ultimaterugby.com/super-rugby-pacific-2026" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="g2">
+    <div class="card p2-accent">
+      <div class="ch"><div class="ct">Tabelle 2026</div><div class="cs" id="srp-date">–</div></div>
+      <div id="srp-table"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+    </div>
+    <div class="card p2-accent">
+      <div class="itabs">
+        <button class="itab p2 active" onclick="switchTab('srp','results')">Ergebnisse</button>
+        <button class="itab p2" onclick="switchTab('srp','fixtures')">Fixtures</button>
+      </div>
+      <div id="srp-results" class="icp active"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+      <div id="srp-fixtures" class="icp"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p2)"></div>Lade...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SVNS -->
+<div class="main section" id="sec-svns">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p2"></span>HSBC SVNS Men's World Series <span class="prio-label p2">PRIO 2</span></div><a class="sh-link" href="https://www.ultimaterugby.com/hsbc-svns-world-series-2024-25" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="card p2-accent" style="margin-bottom:12px;">
+    <div class="ch"><div class="ct">Gesamtwertung 2024/25</div><div class="cs" id="svns-date">Stand: Mai 2025</div></div>
+    <div class="ldrs" id="svns-ldrs"></div>
+    <div id="svns-table"></div>
+  </div>
+  <div class="card p2-accent">
+    <div class="ch"><div class="ct">Saisonkalender</div><div class="cs">Men's 2024/25</div></div>
+    <div id="svns-cal"></div>
+  </div>
+</div>
+
+<!-- CHAMPIONS CUP -->
+<div class="main section" id="sec-ecc">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p3"></span>Investec Champions Cup <span class="prio-label p3">PRIO 3</span></div><a class="sh-link" href="https://www.ultimaterugby.com/champions-cup-2025%2F26" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="g2">
+    <div class="card p3-accent">
+      <div class="itabs">
+        <button class="itab p3 active" onclick="switchTab('ecc','results')">Ergebnisse</button>
+        <button class="itab p3" onclick="switchTab('ecc','fixtures')">Fixtures</button>
+      </div>
+      <div id="ecc-results" class="icp active"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p3)"></div>Lade...</div></div>
+      <div id="ecc-fixtures" class="icp"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p3)"></div>Lade...</div></div>
+    </div>
+    <div class="card p3-accent">
+      <div class="ch"><div class="ct">Aktueller Stand</div><div class="cs" id="ecc-date">–</div></div>
+      <div id="ecc-info"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CHALLENGE CUP -->
+<div class="main section" id="sec-challenge">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p3"></span>EPCR Challenge Cup <span class="prio-label p3">PRIO 3</span></div><a class="sh-link" href="https://www.ultimaterugby.com/challenge-cup-2025%2F26" target="_blank">ultimaterugby.com ↗</a></div>
+  <div class="g2">
+    <div class="card p3-accent">
+      <div class="itabs">
+        <button class="itab p3 active" onclick="switchTab('chc','results')">Ergebnisse</button>
+        <button class="itab p3" onclick="switchTab('chc','fixtures')">Fixtures</button>
+      </div>
+      <div id="chc-results" class="icp active"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p3)"></div>Lade...</div></div>
+      <div id="chc-fixtures" class="icp"><div class="ld"><div class="ldspn spin" style="border-top-color:var(--p3)"></div>Lade...</div></div>
+    </div>
+    <div class="card p3-accent">
+      <div class="ch"><div class="ct">Aktueller Stand</div><div class="cs" id="chc-date">–</div></div>
+      <div id="chc-info"></div>
+    </div>
+  </div>
+</div>
+
+<div class="ftr">
+  <span>Rugby Dashboard v2.0 · Daten: ultimaterugby.com · TheSportsDB · World Rugby</span>
+  <span id="ftrTime">–</span>
+</div>
+
+<script>
+// =================== CONFIG ===================
+const PROXY = 'https://corsproxy.io/?url=';
+const TSDB = 'https://www.thesportsdb.com/api/v1/json/3';
+const UR_BASE = 'https://www.ultimaterugby.com/vhosts/ultimaterugby.com/app/public/index.php';
+
+// TheSportsDB League IDs
+const LEAGUES = {
+  urc: '4515', prem: '4514', top14: '4516_top14', prod2: '4517',
+  superrugby: '4529', ecc: '4538', challenge: '4539',
+  sixnations: '4548', trc: '4549',
+};
+
+// ultimaterugby.com URL slugs
+const UR_SLUGS = {
+  urc: 'urc-2025%2F26',
+  prem: 'premiership-rugby-2025%2F26',
+  top14: 'top-14-2025%2F26',
+  prod2: 'pro-d-2-2025%2F26',
+  superrugby: 'super-rugby-pacific-2026',
+  ecc: 'champions-cup-2025%2F26',
+  challenge: 'challenge-cup-2025%2F26',
+  sixnations: 'six-nations-2026',
+  nc: 'nations-championship-2026',
+  trc: 'rugby-championship-2026',
+  rwc: 'rugby-world-cup-2027-qualification',
+};
+
+// =================== NAV ===================
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  event.target.classList.add('active');
+  // lazy load
+  if (!window.loaded) window.loaded = {};
+  if (!window.loaded[id]) { window.loaded[id] = true; loadSection(id); }
+}
+
+function switchTab(prefix, tab) {
+  const card = event.target.closest('.card') || event.target.closest('.section');
+  const tabs = event.target.closest('.itabs').querySelectorAll('.itab');
+  tabs.forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  const icps = event.target.closest('.card') 
+    ? event.target.closest('.card').querySelectorAll('.icp')
+    : document.querySelectorAll(`#${prefix}-results, #${prefix}-fixtures`);
+  document.querySelectorAll(`[id^="${prefix}-"]`).forEach(el => {
+    if(el.classList.contains('icp')) el.classList.remove('active');
+  });
+  const target = document.getElementById(`${prefix}-${tab}`);
+  if(target) target.classList.add('active');
+}
+
+// =================== HELPERS ===================
+function fmtD(d) { if(!d) return '–'; const dt=new Date(d); return dt.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}); }
+function fmtDL(d) { if(!d) return '–'; const dt=new Date(d); return dt.toLocaleDateString('de-DE',{day:'2-digit',month:'short'}); }
+function fmtT(d,t) { if(!t) return ''; try{const dt=new Date(d+'T'+t);return dt.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});}catch{return t;} }
+function spinner(c='var(--p1)'){ return `<div class="ld"><div class="ldspn spin" style="border-top-color:${c}"></div>Lade...</div>`; }
+
+async function tryFetch(url) {
+  try { const r=await fetch(url); if(!r.ok) throw new Error(r.status); return await r.json(); } catch(e){ return null; }
+}
+
+async function fetchUR(slug, type) {
+  // type: results, table, matches
+  const url = `${UR_BASE}/${slug}/${type}`;
+  const data = await tryFetch(PROXY + encodeURIComponent(url));
+  return data;
+}
+
+async function fetchTSDB(path) {
+  return await tryFetch(`${TSDB}/${path}`);
+}
+
+// =================== RENDERERS ===================
+function matchRow(home, away, sh, sa, status, date, time, p='p1') {
+  const isLive = status && /progress|half|live/i.test(status);
+  const isFuture = (sh===null||sh===''||sh===undefined) && (sa===null||sa===''||sa===undefined);
+  const wH = !isFuture && parseInt(sh) > parseInt(sa);
+  const wA = !isFuture && parseInt(sa) > parseInt(sh);
+  const timeStr = time ? fmtT(date,time) : '';
+  return `<div class="mr">
+    <div class="th"><div class="tn ${wH?'w':''}" title="${home}">${home||'–'}</div></div>
+    <div class="sb">
+      ${isFuture
+        ? `<div class="svs">VS</div><div class="ss up">${timeStr||fmtD(date)}</div>`
+        : `<div class="sm ${isLive?'live':''}">${sh??'–'}&nbsp;–&nbsp;${sa??'–'}</div>
+           <div class="ss ${isLive?'live':''}">${isLive?'<span class="ldot"></span>LIVE':fmtD(date)}</div>`}
+    </div>
+    <div class="ta"><div class="tn ${wA?'w':''}" title="${away}">${away||'–'}</div></div>
+  </div>`;
+}
+
+function standingsTable(rows, ptsColor='var(--p1)', limit=20) {
+  if(!rows||!rows.length) return '<div class="empty">Keine Daten</div>';
+  return `<div style="overflow-x:auto"><table class="stbl">
+    <thead><tr><th>#</th><th>Team</th><th>Sp</th><th>S</th><th>U</th><th>N</th><th>Pkt</th></tr></thead>
+    <tbody>${rows.slice(0,limit).map((t,i)=>{
+      const pos = t.intRank||t.pos||(i+1);
+      const q = pos<=4, q2 = pos<=2;
+      return `<tr>
+        <td><span class="pos ${q2?'q2':q?'q':''}">${pos}</span></td>
+        <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.strTeam||t.team||'–'}</td>
+        <td>${t.intPlayed||t.played||'–'}</td>
+        <td style="color:var(--win)">${t.intWin||t.won||'0'}</td>
+        <td style="color:var(--draw)">${t.intDraw||t.drawn||'0'}</td>
+        <td style="color:var(--loss)">${t.intLoss||t.lost||'0'}</td>
+        <td><span class="pts" style="color:${ptsColor}">${t.intPoints||t.points||'–'}</span></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+function fixtureRow(home, away, date, time, comp) {
+  const dt = new Date(date);
+  const valid = !isNaN(dt);
+  const dayStr = valid ? dt.toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'short'}) : '–';
+  return `<div class="fr">
+    <div class="fd">
+      <div class="fd-d">${valid?dt.getDate():'?'}</div>
+      <div class="fd-m">${valid?dt.toLocaleDateString('de-DE',{month:'short'}).toUpperCase():'–'}</div>
+    </div>
+    <div>
+      <div class="fm">${home} vs ${away}</div>
+      <div class="fc">${dayStr}${comp?' · '+comp:''}${time?' · '+fmtT(date,time):''}</div>
+    </div>
+  </div>`;
+}
+
+function errBox(slug, type) {
+  return `<div class="err">Daten nicht geladen · <a class="srclink" href="https://www.ultimaterugby.com/${slug}/${type}" target="_blank">ultimaterugby.com ↗</a></div>`;
+}
+
+// =================== TSDB FETCHER ===================
+async function loadTSDB(leagueId, season, resultEl, fixtureEl, tableEl, dateEl, ptsColor='var(--p1)') {
+  const data = await fetchTSDB(`eventsseason.php?id=${leagueId}&s=${season}`);
+  const now = new Date();
+
+  if(!data || !data.events) {
+    if(resultEl) resultEl.innerHTML = '<div class="empty">Keine Live-Daten</div>';
+    if(fixtureEl) fixtureEl.innerHTML = '<div class="empty">Keine Live-Daten</div>';
+    if(tableEl) tableEl.innerHTML = '<div class="empty">Keine Live-Daten</div>';
+    return;
+  }
+
+  const events = data.events||[];
+  const past = events.filter(e=>e.intHomeScore!==null&&e.intHomeScore!=='').slice(-7).reverse();
+  const future = events.filter(e=>(e.intHomeScore===null||e.intHomeScore==='')&&new Date(e.dateEvent)>now).slice(0,6);
+
+  if(dateEl && past[0]) dateEl.textContent = 'Zuletzt: '+fmtD(past[0].dateEvent);
+
+  if(resultEl) resultEl.innerHTML = past.length
+    ? past.map(e=>matchRow(e.strHomeTeam,e.strAwayTeam,e.intHomeScore,e.intAwayScore,e.strStatus,e.dateEvent,e.strTime)).join('')
+    : '<div class="empty">Keine Ergebnisse</div>';
+
+  if(fixtureEl) fixtureEl.innerHTML = future.length
+    ? future.map(e=>fixtureRow(e.strHomeTeam,e.strAwayTeam,e.dateEvent,e.strTime,'')).join('')
+    : '<div class="empty">Keine anstehenden Spiele</div>';
+
+  if(tableEl) {
+    const tbl = await fetchTSDB(`lookuptable.php?l=${leagueId}&s=${season}`);
+    tableEl.innerHTML = tbl&&tbl.table ? standingsTable(tbl.table, ptsColor) : '<div class="empty">Tabelle nicht verfügbar</div>';
+  }
+}
+
+// =================== WORLD RANKINGS (static, Mai 2026) ===================
+function loadWorldRankings() {
+  // Nach Six Nations 2026 – Schottland auf 5, Italien auf 9
+  const men = [
+    {pos:1,flag:'🇿🇦',team:'Südafrika',pts:'94.62'},{pos:2,flag:'🇮🇪',team:'Irland',pts:'91.97'},
+    {pos:3,flag:'🇳🇿',team:'Neuseeland',pts:'89.55'},{pos:4,flag:'🇫🇷',team:'Frankreich',pts:'88.58'},
+    {pos:5,flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',team:'Schottland',pts:'85.44'},{pos:6,flag:'🇦🇷',team:'Argentinien',pts:'84.22'},
+    {pos:7,flag:'🇦🇺',team:'Australien',pts:'83.10'},{pos:8,flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',team:'England',pts:'82.01'},
+    {pos:9,flag:'🇮🇹',team:'Italien',pts:'80.88'},{pos:10,flag:'🏴󠁧󠁢󠁷󠁬󠁳󠁿',team:'Wales',pts:'78.44'},
+  ];
+  const el = document.getElementById('wr-men');
+  el.innerHTML = `<table class="stbl"><thead><tr><th>#</th><th>Nation</th><th>Punkte</th></tr></thead><tbody>
+    ${men.map(r=>`<tr>
+      <td><span class="pos ${r.pos<=4?'q':''} ${r.pos<=2?'q2':''}">${r.pos}</span></td>
+      <td>${r.flag} ${r.team}</td>
+      <td><span class="wrpts">${r.pts}</span></td>
+    </tr>`).join('')}
+  </tbody></table>`;
+  document.getElementById('wr-date').textContent = 'Stand: nach 6N 2026';
+}
+
+function loadRecentTests() {
+  const tests = [
+    {home:'🇫🇷 Frankreich',away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',sh:'48',sa:'46',date:'2026-03-14',comp:'6N R5 · Thriller!'},
+    {home:'🇮🇪 Irland',away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',sh:'43',sa:'21',date:'2026-03-14',comp:'6N R5'},
+    {home:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',away:'🇮🇹 Italien',sh:'31',sa:'17',date:'2026-03-14',comp:'6N R5'},
+    {home:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',away:'🇫🇷 Frankreich',sh:'50',sa:'40',date:'2026-03-07',comp:'6N R4 · Rekord!'},
+    {home:'🇮🇹 Italien',away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',sh:'20',sa:'13',date:'2026-03-07',comp:'6N R4 · Historisch!'},
+    {home:'🇮🇪 Irland',away:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',sh:'27',sa:'17',date:'2026-03-06',comp:'6N R4'},
+  ];
+  const el = document.getElementById('test-results');
+  document.getElementById('test-date').textContent = 'Letztes: 14. Mär 2026';
+  el.innerHTML = tests.map(t => matchRow(t.home, t.away, t.sh, t.sa, 'Match Finished', t.date, '')).join('');
+  el.innerHTML += `<div class="cr" style="padding:10px 14px;border-top:1px solid var(--border);">
+    <div><div class="ce">⚡ Nations Championship 2026</div><div class="cm">Nächstes großes Turnier · Start: 4. Juli 2026</div></div>
+    <span class="cst soon">Anstehend</span>
+  </div>`;
+  document.getElementById('tb-next').textContent = 'NC 2026';
+  document.getElementById('tb-next-sub').textContent = '4. Juli 2026';
+}
+
+// =================== RWC 2027 QUALI (static overview) ===================
+function loadRWCQuali() {
+  const regions = [
+    {name:'Europa', slots:8, status:'Laufend – über 6N/NC'},
+    {name:'Americas', slots:4, status:'Laufend – über TRC/Quali'},
+    {name:'Ozeanien', slots:4, status:'Laufend – über SR Pacific'},
+    {name:'Afrika', slots:3, status:'Laufend – über Rugby Africa Cup'},
+    {name:'Asien', slots:3, status:'Laufend – über Asia Rugby'},
+    {name:'Gastgeber', slots:1, status:'✅ Australien qualifiziert'},
+    {name:'Repêchage', slots:2, status:'Ausstehend'},
+  ];
+  document.getElementById('rwc-quali').innerHTML = regions.map(r=>`
+    <div class="cr">
+      <div><div class="ce">${r.name}</div><div class="cm">${r.slots} Startplatz${r.slots>1?'e':''}</div></div>
+      <span class="cst ${r.status.includes('✅')?'next':'soon'}">${r.status}</span>
+    </div>`).join('');
+  document.getElementById('rwc-results').innerHTML = `<div class="empty">Quali-Spiele werden über die jeweiligen Turnierseiten geladen.<br><br><a class="srclink" href="https://www.ultimaterugby.com/rugby-world-cup-2027-qualification" target="_blank">Zur Quali-Übersicht auf ultimaterugby.com ↗</a></div>`;
+}
+
+// =================== SVNS (static 2024/25) ===================
+const SVNS_MEN = [
+  {pos:1,flag:'🇦🇷',team:'Argentinien',pts:138},{pos:2,flag:'🇫🇷',team:'Frankreich',pts:126},
+  {pos:3,flag:'🇳🇿',team:'Neuseeland',pts:120},{pos:4,flag:'🇦🇺',team:'Australien',pts:108},
+  {pos:5,flag:'🇮🇪',team:'Irland',pts:102},{pos:6,flag:'🇫🇯',team:'Fidschi',pts:96},
+  {pos:7,flag:'🇬🇧',team:'GB',pts:90},{pos:8,flag:'🇿🇦',team:'Südafrika',pts:84},
+  {pos:9,flag:'🇺🇸',team:'USA',pts:72},{pos:10,flag:'🇪🇸',team:'Spanien',pts:66},
+  {pos:11,flag:'🇺🇾',team:'Uruguay',pts:54},{pos:12,flag:'🇰🇪',team:'Kenia',pts:48},
+];
+const SVNS_CAL = [
+  {e:'Hong Kong Sevens',l:'Hong Kong',d:'2024-11-01',s:'done'},
+  {e:'Dubai Sevens',l:'Dubai, VAE',d:'2024-11-29',s:'done'},
+  {e:'Cape Town Sevens',l:'Kapstadt',d:'2024-12-14',s:'done'},
+  {e:'Hamilton Sevens',l:'Hamilton, NZL',d:'2025-01-25',s:'done'},
+  {e:'Sydney Sevens',l:'Sydney, AUS',d:'2025-01-31',s:'done'},
+  {e:'Los Angeles Sevens',l:'Los Angeles',d:'2025-02-28',s:'done'},
+  {e:'Vancouver Sevens',l:'Vancouver',d:'2025-03-08',s:'done'},
+  {e:'Hong Kong Sevens',l:'Hong Kong',d:'2025-04-01',s:'done'},
+  {e:'Singapore Sevens',l:'Singapur',d:'2025-04-12',s:'done'},
+  {e:'Toulouse Sevens',l:'Toulouse, FRA',d:'2025-05-16',s:'next'},
+  {e:'London Sevens',l:'London, GBR',d:'2025-05-24',s:'soon'},
+  {e:'Madrid Sevens',l:'Madrid, ESP',d:'2025-05-30',s:'soon'},
+];
+
+function loadSVNS() {
+  document.getElementById('svns-ldrs').innerHTML = SVNS_MEN.slice(0,3).map(t=>`
+    <div class="lc"><div class="lr">#${t.pos}</div><div class="lt">${t.flag} ${t.team}</div>
+    <div class="lp">${t.pts}</div><div class="lpl">Series Pkt</div></div>`).join('');
+  document.getElementById('svns-table').innerHTML = standingsTable(
+    SVNS_MEN.map(t=>({...t,strTeam:`${t.flag} ${t.team}`,intPoints:t.pts,intPlayed:'9',intWin:'–',intDraw:'–',intLoss:'–',intRank:t.pos})),
+    'var(--p2)', 12);
+  document.getElementById('svns-cal').innerHTML = SVNS_CAL.map(e=>{
+    const dt = new Date(e.d);
+    return `<div class="cr">
+      <div><div class="ce">${e.e}</div><div class="cm">${e.l} · ${dt.toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'2-digit'})}</div></div>
+      <span class="cst ${e.s==='done'?'done':e.s==='next'?'next':'soon'}">${e.s==='done'?'Abgeschlossen':e.s==='next'?'⚡ Nächstes':'Anstehend'}</span>
+    </div>`;
+  }).join('');
+}
+
+// =================== NC 2026 (real data) ===================
+const NC_JULY = [
+  // Runde 1 – 4./5./6. Juli
+  {r:'Runde 1 · Juli',home:'🇳🇿 Neuseeland',away:'🇫🇷 Frankreich',date:'2026-07-04',time:'08:10',venue:'Christchurch'},
+  {r:'Runde 1 · Juli',home:'🇯🇵 Japan',away:'🇮🇹 Italien',date:'2026-07-04',time:'09:40',venue:'Tokio'},
+  {r:'Runde 1 · Juli',home:'🇦🇺 Australien',away:'🇮🇪 Irland',date:'2026-07-04',time:'11:10',venue:'Sydney'},
+  {r:'Runde 1 · Juli',home:'🇫🇯 Fidschi',away:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',date:'2026-07-05',time:'14:10',venue:'Cardiff'},
+  {r:'Runde 1 · Juli',home:'🇿🇦 Südafrika',away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',date:'2026-07-05',time:'16:40',venue:'Johannesburg'},
+  {r:'Runde 1 · Juli',home:'🇦🇷 Argentinien',away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',date:'2026-07-06',time:'20:10',venue:'Santiago del Estero'},
+  // Runde 2 – 11./12./13. Juli
+  {r:'Runde 2 · Juli',home:'🇯🇵 Japan',away:'🇫🇷 Frankreich',date:'2026-07-11',time:'09:40',venue:'Tokio'},
+  {r:'Runde 2 · Juli',home:'🇦🇺 Australien',away:'🇮🇹 Italien',date:'2026-07-11',time:'11:10',venue:'Perth'},
+  {r:'Runde 2 · Juli',home:'🇫🇯 Fidschi',away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',date:'2026-07-12',time:'14:10',venue:'Edinburgh'},
+  {r:'Runde 2 · Juli',home:'🇿🇦 Südafrika',away:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',date:'2026-07-12',time:'16:40',venue:'Durban'},
+  {r:'Runde 2 · Juli',home:'🇦🇷 Argentinien',away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',date:'2026-07-12',time:'20:10',venue:'Santiago del Estero'},
+  {r:'Runde 2 · Juli',home:'🇳🇿 Neuseeland',away:'🇮🇪 Irland',date:'2026-07-13',time:'08:10',venue:'Auckland'},
+  // Runde 3 – 18./19. Juli
+  {r:'Runde 3 · Juli',home:'🇳🇿 Neuseeland',away:'🇮🇹 Italien',date:'2026-07-18',time:'08:10',venue:'Wellington'},
+  {r:'Runde 3 · Juli',home:'🇯🇵 Japan',away:'🇮🇪 Irland',date:'2026-07-18',time:'09:40',venue:'Newcastle (AUS)'},
+  {r:'Runde 3 · Juli',home:'🇦🇺 Australien',away:'🇫🇷 Frankreich',date:'2026-07-18',time:'11:10',venue:'Brisbane'},
+  {r:'Runde 3 · Juli',home:'🇫🇯 Fidschi',away:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',date:'2026-07-19',time:'14:10',venue:'Cardiff'},
+  {r:'Runde 3 · Juli',home:'🇦🇷 Argentinien',away:'🇿🇦 Südafrika',date:'2026-07-19',time:'16:40',venue:'Buenos Aires'},
+  {r:'Runde 3 · Juli',home:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',date:'2026-07-19',time:'20:10',venue:'Edinburgh'},
+];
+const NC_NOV = [
+  // Runde 4 – November (Heim-Serie Norden)
+  {r:'Runde 4 · Nov',home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',away:'🇦🇺 Australien',date:'2026-11-08',time:'15:10',venue:'Twickenham'},
+  {r:'Runde 4 · Nov',home:'🇫🇷 Frankreich',away:'🇦🇷 Argentinien',date:'2026-11-08',time:'TBC',venue:'Paris'},
+  {r:'Runde 4 · Nov',home:'🇮🇪 Irland',away:'🇿🇦 Südafrika',date:'2026-11-08',time:'TBC',venue:'Dublin'},
+  {r:'Runde 4 · Nov',home:'🇮🇹 Italien',away:'🇯🇵 Japan',date:'2026-11-08',time:'TBC',venue:'Rom'},
+  {r:'Runde 4 · Nov',home:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',away:'🇳🇿 Neuseeland',date:'2026-11-08',time:'TBC',venue:'Edinburgh'},
+  {r:'Runde 4 · Nov',home:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',away:'🇫🇯 Fidschi',date:'2026-11-08',time:'TBC',venue:'Cardiff'},
+  // Runde 5
+  {r:'Runde 5 · Nov',home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',away:'🇯🇵 Japan',date:'2026-11-14',time:'TBC',venue:'Twickenham'},
+  {r:'Runde 5 · Nov',home:'🇫🇷 Frankreich',away:'🇫🇯 Fidschi',date:'2026-11-14',time:'TBC',venue:'Paris'},
+  {r:'Runde 5 · Nov',home:'🇮🇪 Irland',away:'🇦🇷 Argentinien',date:'2026-11-14',time:'TBC',venue:'Dublin'},
+  {r:'Runde 5 · Nov',home:'🇮🇹 Italien',away:'🇳🇿 Neuseeland',date:'2026-11-14',time:'TBC',venue:'Rom'},
+  {r:'Runde 5 · Nov',home:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',away:'🇦🇺 Australien',date:'2026-11-14',time:'TBC',venue:'Edinburgh'},
+  {r:'Runde 5 · Nov',home:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',away:'🇿🇦 Südafrika',date:'2026-11-14',time:'TBC',venue:'Cardiff'},
+  // Runde 6
+  {r:'Runde 6 · Nov',home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',away:'🇳🇿 Neuseeland',date:'2026-11-21',time:'TBC',venue:'Twickenham'},
+  {r:'Runde 6 · Nov',home:'🇫🇷 Frankreich',away:'🇿🇦 Südafrika',date:'2026-11-21',time:'TBC',venue:'Paris'},
+  {r:'Runde 6 · Nov',home:'🇮🇪 Irland',away:'🇫🇯 Fidschi',date:'2026-11-21',time:'TBC',venue:'Dublin'},
+  {r:'Runde 6 · Nov',home:'🇮🇹 Italien',away:'🇦🇺 Australien',date:'2026-11-21',time:'TBC',venue:'Rom'},
+  {r:'Runde 6 · Nov',home:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',away:'🇯🇵 Japan',date:'2026-11-21',time:'TBC',venue:'Edinburgh'},
+  {r:'Runde 6 · Nov',home:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',away:'🇦🇷 Argentinien',date:'2026-11-21',time:'TBC',venue:'Cardiff'},
+  // Finals Weekend
+  {r:'🏆 Finals Weekend · 27.-29. Nov',home:'1. Europa',away:'1. Südhem.',date:'2026-11-29',time:'TBC',venue:'Twickenham'},
+  {r:'🏆 Finals Weekend · 27.-29. Nov',home:'2. Europa',away:'2. Südhem.',date:'2026-11-28',time:'TBC',venue:'Twickenham'},
+  {r:'🏆 Finals Weekend · 27.-29. Nov',home:'3. Europa',away:'3. Südhem.',date:'2026-11-28',time:'TBC',venue:'Twickenham'},
+];
+
+function loadNC() {
+  // Tabelle: noch keine Spiele, Starttabelle zeigen
+  const teams = [
+    {pos:1,strTeam:'🇫🇷 Frankreich',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:1},
+    {pos:2,strTeam:'🇮🇪 Irland',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:2},
+    {pos:3,strTeam:'🇳🇿 Neuseeland',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:3},
+    {pos:4,strTeam:'🇿🇦 Südafrika',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:4},
+    {pos:5,strTeam:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:5},
+    {pos:6,strTeam:'🇦🇷 Argentinien',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:6},
+    {pos:7,strTeam:'🇦🇺 Australien',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:7},
+    {pos:8,strTeam:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:8},
+    {pos:9,strTeam:'🇮🇹 Italien',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:9},
+    {pos:10,strTeam:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:10},
+    {pos:11,strTeam:'🇫🇯 Fidschi',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:11},
+    {pos:12,strTeam:'🇯🇵 Japan',intPlayed:'0',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'0',intRank:12},
+  ];
+  document.getElementById('nc-table').innerHTML = standingsTable(teams, 'var(--p1)', 12);
+  document.getElementById('nc-date').textContent = 'Start: 4. Juli 2026';
+  document.getElementById('nc-results').innerHTML = '<div class="empty">Erste Spielrunde beginnt am 4. Juli 2026 · Noch keine Ergebnisse</div>';
+
+  // Fixtures: alle anzeigen (Juli + Nov + Finals) – EIN Header pro Runde
+  const allFixtures = [...NC_JULY, ...NC_NOV];
+  let lastRound = '';
+  let html = '';
+  allFixtures.forEach(f => {
+    if(f.r !== lastRound) {
+      html += `<div style="padding:6px 14px 3px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);background:var(--bg3);border-bottom:1px solid var(--border);letter-spacing:.5px;text-transform:uppercase;">${f.r}</div>`;
+      lastRound = f.r;
+    }
+    const dt = new Date(f.date);
+    const valid = !isNaN(dt);
+    const dayStr = valid ? dt.toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'short'}) : '–';
+    html += `<div class="fr">
+      <div class="fd">
+        <div class="fd-d" style="font-size:15px">${valid?dt.getDate():'?'}</div>
+        <div class="fd-m">${valid?dt.toLocaleDateString('de-DE',{month:'short'}).toUpperCase():'–'}</div>
+      </div>
+      <div>
+        <div class="fm">${f.home} vs ${f.away}</div>
+        <div class="fc">${f.venue}${f.time&&f.time!=='TBC'?' · '+f.time+' BST':' · Zeit TBC'}</div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('nc-fixtures').innerHTML = html;
+}
+
+// =================== CUP INFO BOXES ===================
+function loadCupInfo(prefix, name) {
+  const el = document.getElementById(`${prefix}-info`);
+  const dateEl = document.getElementById(`${prefix}-date`);
+  if(el) el.innerHTML = `<div class="empty">Aktuelle Runde wird geladen…<br><br>
+    <a class="srclink" href="https://www.ultimaterugby.com/${UR_SLUGS[prefix==='ecc'?'ecc':'challenge']}" target="_blank">${name} auf ultimaterugby.com ↗</a></div>`;
+  if(dateEl) dateEl.textContent = '2025/26';
+}
+
+// =================== SECTION LOADER ===================
+async function loadSection(id) {
+  switch(id) {
+    case 'testRugby':
+      loadWorldRankings();
+      loadRecentTests();
+      break;
+    case '6nations':
+      // 2026 Abschlusstabelle
+      const sixN2026table = [
+        {intRank:1,strTeam:'🇫🇷 Frankreich',intPlayed:'5',intWin:'4',intDraw:'0',intLoss:'1',intPoints:'21'},
+        {intRank:2,strTeam:'🇮🇪 Irland',intPlayed:'5',intWin:'4',intDraw:'0',intLoss:'1',intPoints:'19'},
+        {intRank:3,strTeam:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',intPlayed:'5',intWin:'3',intDraw:'0',intLoss:'2',intPoints:'16'},
+        {intRank:4,strTeam:'🇮🇹 Italien',intPlayed:'5',intWin:'2',intDraw:'0',intLoss:'3',intPoints:'9'},
+        {intRank:5,strTeam:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',intPlayed:'5',intWin:'1',intDraw:'0',intLoss:'4',intPoints:'8'},
+        {intRank:6,strTeam:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',intPlayed:'5',intWin:'1',intDraw:'0',intLoss:'4',intPoints:'6'},
+      ];
+      document.getElementById('6n-table').innerHTML = standingsTable(sixN2026table, 'var(--p1)');
+      document.getElementById('6n-date').textContent = 'Abschlusstabelle 2026';
+
+      // 2026 Ergebnisse alle 15 Spiele
+      const sixN2026results = [
+        {r:'R1',home:'🇫🇷 Frankreich',away:'🇮🇪 Irland',sh:'36',sa:'14',date:'2026-02-05'},
+        {r:'R1',home:'🇮🇹 Italien',away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',sh:'18',sa:'15',date:'2026-02-07'},
+        {r:'R1',home:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',sh:'7',sa:'48',date:'2026-02-07'},
+        {r:'R2',home:'🇮🇪 Irland',away:'🇮🇹 Italien',sh:'20',sa:'13',date:'2026-02-14'},
+        {r:'R2',home:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',sh:'31',sa:'20',date:'2026-02-14'},
+        {r:'R2',home:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',away:'🇫🇷 Frankreich',sh:'12',sa:'54',date:'2026-02-15'},
+        {r:'R3',home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',away:'🇮🇪 Irland',sh:'21',sa:'42',date:'2026-02-21'},
+        {r:'R3',home:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',sh:'23',sa:'26',date:'2026-02-21'},
+        {r:'R3',home:'🇫🇷 Frankreich',away:'🇮🇹 Italien',sh:'33',sa:'8',date:'2026-02-22'},
+        {r:'R4',home:'🇮🇪 Irland',away:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',sh:'27',sa:'17',date:'2026-03-06'},
+        {r:'R4',home:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',away:'🇫🇷 Frankreich',sh:'50',sa:'40',date:'2026-03-07'},
+        {r:'R4',home:'🇮🇹 Italien',away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',sh:'20',sa:'13',date:'2026-03-07'},
+        {r:'R5',home:'🇮🇪 Irland',away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',sh:'43',sa:'21',date:'2026-03-14'},
+        {r:'R5',home:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',away:'🇮🇹 Italien',sh:'31',sa:'17',date:'2026-03-14'},
+        {r:'R5',home:'🇫🇷 Frankreich',away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',sh:'48',sa:'46',date:'2026-03-14'},
+      ];
+      let rHtml = '', lastR = '';
+      sixN2026results.forEach(m => {
+        if(m.r !== lastR) {
+          if(lastR) rHtml += '';
+          const rnd = m.r==='R1'?'Runde 1':m.r==='R2'?'Runde 2':m.r==='R3'?'Runde 3':m.r==='R4'?'Runde 4':'Runde 5 · Super Saturday';
+          rHtml += `<div style="padding:5px 14px 3px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);background:var(--bg3);border-bottom:1px solid var(--border);letter-spacing:.5px;">${rnd}</div>`;
+          lastR = m.r;
+        }
+        rHtml += matchRow(m.home, m.away, m.sh, m.sa, 'Match Finished', m.date, '');
+      });
+      document.getElementById('6n-results').innerHTML = rHtml;
+
+      // 2027 Fixtures
+      const sixN2027 = [
+        {r:'R1',home:'🇮🇪 Irland',away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',date:'2027-02-05',time:'20:10',venue:'Dublin'},
+        {r:'R1',home:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',away:'🇮🇹 Italien',date:'2027-02-06',time:'14:10',venue:'Edinburgh'},
+        {r:'R1',home:'🇫🇷 Frankreich',away:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',date:'2027-02-06',time:'16:40',venue:'Paris'},
+        {r:'R2',home:'🇮🇹 Italien',away:'🇮🇪 Irland',date:'2027-02-13',time:'14:10',venue:'Rom'},
+        {r:'R2',home:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',away:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',date:'2027-02-13',time:'16:40',venue:'Edinburgh'},
+        {r:'R2',home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',away:'🇫🇷 Frankreich',date:'2027-02-14',time:'15:10',venue:'Twickenham'},
+        {r:'R3',home:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',away:'🇮🇪 Irland',date:'2027-02-20',time:'14:10',venue:'Cardiff'},
+        {r:'R3',home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',away:'🇮🇹 Italien',date:'2027-02-20',time:'16:40',venue:'Twickenham'},
+        {r:'R3',home:'🇫🇷 Frankreich',away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',date:'2027-02-21',time:'15:10',venue:'Paris'},
+        {r:'R4',home:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',away:'🇮🇪 Irland',date:'2027-03-05',time:'20:10',venue:'Edinburgh'},
+        {r:'R4',home:'🇮🇹 Italien',away:'🇫🇷 Frankreich',date:'2027-03-06',time:'14:10',venue:'Rom'},
+        {r:'R4',home:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',away:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',date:'2027-03-06',time:'16:40',venue:'Cardiff'},
+        {r:'R5',home:'🇮🇹 Italien',away:'🏴󠁧󠁢󠁷󠁬󠁳󠁿 Wales',date:'2027-03-13',time:'14:10',venue:'Rom'},
+        {r:'R5',home:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',away:'🏴󠁧󠁢󠁳󠁣󠁴󠁿 Schottland',date:'2027-03-13',time:'16:40',venue:'Twickenham'},
+        {r:'R5',home:'🇮🇪 Irland',away:'🇫🇷 Frankreich',date:'2027-03-13',time:'20:10',venue:'Dublin'},
+      ];
+      let fHtml = '', lastFR = '';
+      sixN2027.forEach(f => {
+        if(f.r !== lastFR) {
+          const rnd = f.r==='R1'?'Runde 1':f.r==='R2'?'Runde 2':f.r==='R3'?'Runde 3':f.r==='R4'?'Runde 4':'Runde 5 · Super Saturday';
+          fHtml += `<div style="padding:5px 14px 3px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);background:var(--bg3);border-bottom:1px solid var(--border);letter-spacing:.5px;">${rnd} 2027</div>`;
+          lastFR = f.r;
+        }
+        fHtml += fixtureRow(f.home, f.away, f.date, f.time, f.venue);
+      });
+      document.getElementById('6n-fixtures').innerHTML = fHtml;
+      break;
+    case 'trc':
+      await loadTSDB('4549','2026',
+        document.getElementById('trc-results'),
+        document.getElementById('trc-fixtures'),
+        document.getElementById('trc-table'),
+        document.getElementById('trc-date'));
+      break;
+    case 'nc2026': loadNC(); break;
+    case 'rwc': loadRWCQuali(); break;
+    case 'urc':
+      await loadTSDB('4515','2025-2026',
+        document.getElementById('urc-results'),
+        document.getElementById('urc-fixtures'),
+        document.getElementById('urc-table'),
+        document.getElementById('urc-date'),'var(--p2)');
+      break;
+    case 'prem':
+      await loadTSDB('4514','2025-2026',
+        document.getElementById('prem-results'),
+        document.getElementById('prem-fixtures'),
+        document.getElementById('prem-table'),
+        document.getElementById('prem-date'),'var(--p2)');
+      break;
+    case 'top14':
+      await loadTSDB('4444','2025-2026',
+        document.getElementById('t14-results'),
+        document.getElementById('t14-fixtures'),
+        document.getElementById('t14-table'),
+        document.getElementById('t14-date'),'var(--p2)');
+      break;
+    case 'prod2':
+      await loadTSDB('4445','2025-2026',
+        document.getElementById('pd2-results'),
+        document.getElementById('pd2-fixtures'),
+        document.getElementById('pd2-table'),
+        document.getElementById('pd2-date'),'var(--p2)');
+      break;
+    case 'superrugby':
+      await loadTSDB('4529','2026',
+        document.getElementById('srp-results'),
+        document.getElementById('srp-fixtures'),
+        document.getElementById('srp-table'),
+        document.getElementById('srp-date'),'var(--p2)');
+      break;
+    case 'svns': loadSVNS(); break;
+    case 'ecc':
+      loadCupInfo('ecc','Champions Cup');
+      await loadTSDB('4538','2025-2026',
+        document.getElementById('ecc-results'),
+        document.getElementById('ecc-fixtures'),
+        null, document.getElementById('ecc-date'),'var(--p3)');
+      break;
+    case 'challenge':
+      loadCupInfo('chc','Challenge Cup');
+      await loadTSDB('4539','2025-2026',
+        document.getElementById('chc-results'),
+        document.getElementById('chc-fixtures'),
+        null, document.getElementById('chc-date'),'var(--p3)');
+      break;
+  }
+}
+
+// =================== MAIN LOAD ===================
+async function loadAll() {
+  const btn = document.getElementById('refBtn');
+  const icon = document.getElementById('refIcon');
+  btn.classList.add('loading');
+  icon.classList.add('spin');
+  window.loaded = {};
+  const now = new Date();
+  document.getElementById('upd').textContent = 'Aktualisiert: ' + now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('ftrTime').textContent = now.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' · ' + now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  await loadSection('testRugby');
+  window.loaded = {testRugby: true};
+  btn.classList.remove('loading');
+  icon.classList.remove('spin');
+}
+
+// =================== LOGO SYSTEM ===================
+const LOGO_DEFS = [
+  {key:'testRugby',  label:'Test Rugby / World Rugby'},
+  {key:'6nations',   label:'Six Nations'},
+  {key:'nc2026',     label:'Nations Championship'},
+  {key:'trc',        label:'The Rugby Championship'},
+  {key:'rwc',        label:'RWC 2027'},
+  {key:'urc',        label:'URC'},
+  {key:'prem',       label:'Premiership Rugby'},
+  {key:'top14',      label:'Top 14'},
+  {key:'prod2',      label:'Pro D2'},
+  {key:'superrugby', label:'Super Rugby Pacific'},
+  {key:'svns',       label:'SVNS World Series'},
+  {key:'ecc',        label:'Champions Cup'},
+  {key:'challenge',  label:'Challenge Cup'},
+];
+const LS_PREFIX = 'rugby_logo_';
+
+function getLogoSrc(key) {
+  try { return localStorage.getItem(LS_PREFIX + key) || null; } catch(e) { return null; }
+}
+
+function saveLogo(key, dataUrl) {
+  try { localStorage.setItem(LS_PREFIX + key, dataUrl); } catch(e) { console.warn('localStorage voll?', e); }
+}
+
+function applyLogos() {
+  document.querySelectorAll('.ptab-logo').forEach(btn => {
+    const key = btn.dataset.logoKey;
+    if (!key) return;
+    const src = getLogoSrc(key);
+    const img = btn.querySelector('.lbadge');
+    const badge = btn.querySelector('.ltxt-badge');
+    if (src && img) {
+      img.src = src;
+      img.style.display = '';
+      if (badge) badge.style.display = 'none';
+    } else if (img) {
+      img.style.display = 'none';
+      if (badge) badge.style.display = 'flex';
+    }
+  });
+}
+
+function buildSetupGrid() {
+  const grid = document.getElementById('setupGrid');
+  grid.innerHTML = LOGO_DEFS.map(d => {
+    const existing = getLogoSrc(d.key);
+    return `<div class="setup-item ${existing?'done':''}" id="si-${d.key}">
+      ${existing
+        ? `<img class="si-preview" src="${existing}">`
+        : `<div class="si-placeholder">${d.key.substring(0,3).toUpperCase()}</div>`}
+      <div>
+        <div class="si-label">${d.label}</div>
+        <div class="si-status ${existing?'ok':''}" id="sis-${d.key}">${existing?'✓ Gespeichert':'Klicken zum Wählen'}</div>
+      </div>
+      <input type="file" accept="image/*" onchange="handleLogoFile(event,'${d.key}')">
+    </div>`;
+  }).join('');
+  updateSetupProgress();
+}
+
+function handleLogoFile(e, key) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const dataUrl = ev.target.result;
+    saveLogo(key, dataUrl);
+    const item = document.getElementById('si-' + key);
+    const status = document.getElementById('sis-' + key);
+    if (item) {
+      item.classList.add('done');
+      const placeholder = item.querySelector('.si-placeholder');
+      if (placeholder) {
+        const img = document.createElement('img');
+        img.className = 'si-preview';
+        img.src = dataUrl;
+        placeholder.replaceWith(img);
+      } else {
+        const img = item.querySelector('.si-preview');
+        if (img) img.src = dataUrl;
+      }
+    }
+    if (status) { status.textContent = '✓ Gespeichert'; status.classList.add('ok'); }
+    updateSetupProgress();
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateSetupProgress() {
+  const total = LOGO_DEFS.length;
+  const done = LOGO_DEFS.filter(d => getLogoSrc(d.key)).length;
+  const el = document.getElementById('setupProgress');
+  if (el) el.textContent = `${done} / ${total} geladen`;
+}
+
+function skipSetup() {
+  document.getElementById('setupOverlay').style.display = 'none';
+  try { localStorage.setItem('rugby_setup_done', '1'); } catch(e) {}
+}
+
+function finishSetup() {
+  applyLogos();
+  skipSetup();
+}
+
+function openSetup() {
+  buildSetupGrid();
+  document.getElementById('setupOverlay').style.display = 'flex';
+}
+
+function checkLogoSetup() {
+  const done = LOGO_DEFS.filter(d => getLogoSrc(d.key)).length;
+  const skipped = localStorage.getItem('rugby_setup_done');
+  if (done === 0 && !skipped) {
+    // First time: show setup after short delay
+    setTimeout(() => openSetup(), 800);
+  } else {
+    applyLogos();
+  }
+}
+
+// Auto-start
+loadAll();
+checkLogoSetup();
+</script>
+</body>
+</html>
