@@ -15,7 +15,7 @@
   --p3:#f5a03a; --p3bg:rgba(245,160,58,0.12);
   --win:#3af5a0; --loss:#f53a6e; --draw:#f5a03a;
   --live:#f53a6e;
-} 
+}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
 
@@ -183,42 +183,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .srclink{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-decoration:none;}
 .srclink:hover{color:var(--text);}
 
-/* LOGO SETUP MODAL */
-.setup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-.setup-box{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px;max-width:520px;width:90%;}
-.setup-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--p1);margin-bottom:6px;}
-.setup-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5;}
-.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
-.setup-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s;position:relative;overflow:hidden;}
-.setup-item:hover{border-color:var(--border2);}
-.setup-item.done{border-color:rgba(58,245,160,.4);}
-.setup-item .si-preview{width:28px;height:28px;object-fit:contain;border-radius:4px;flex-shrink:0;}
-.setup-item .si-placeholder{width:28px;height:28px;border-radius:4px;background:var(--bg4);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;}
-.setup-item .si-label{font-size:12px;font-weight:500;color:var(--text);}
-.setup-item .si-status{font-size:10px;color:var(--muted);margin-top:1px;font-family:'DM Mono',monospace;}
-.setup-item .si-status.ok{color:var(--win);}
-.setup-item input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
-.setup-actions{display:flex;gap:8px;justify-content:flex-end;}
-.btn-setup-skip{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;}
-.btn-setup-skip:hover{color:var(--text);}
-.btn-setup-done{background:var(--p1);color:#0d0f14;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;}
-.setup-progress{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-right:auto;align-self:center;}
+
 </style>
 </head>
 <body>
 
-<!-- LOGO SETUP MODAL -->
-<div class="setup-overlay" id="setupOverlay" style="display:none;">
-  <div class="setup-box">
-    <div class="setup-title">🏉 Logo Setup</div>
-    <div class="setup-sub">Lade einmalig die Turnierlogos von ultimaterugby.com hoch – sie werden dauerhaft im Browser gespeichert und müssen nie wieder importiert werden.</div>
-    <div class="setup-grid" id="setupGrid"></div>
-    <div class="setup-actions">
-      <div class="setup-progress" id="setupProgress">0 / 13 geladen</div>
-      <button class="btn-setup-skip" onclick="skipSetup()">Überspringen</button>
-      <button class="btn-setup-done" onclick="finishSetup()">Fertig & Speichern</button>
-    </div>
-  </div>
+
 </div>
 
 <div class="hdr">
@@ -234,10 +204,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="btn-ref" id="refBtn" onclick="loadAll()">
       <svg id="refIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
       Aktualisieren
-    </button>
-    <button class="btn-ref" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border2);" onclick="openSetup()" title="Logos einrichten">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-      Logos
     </button>
   </div>
 </div>
@@ -1107,32 +1073,11 @@ async function loadAll() {
   icon.classList.remove('spin');
 }
 
-// =================== LOGO SYSTEM ===================
-const LOGO_DEFS = [
-  {key:'testRugby',  label:'Test Rugby / World Rugby'},
-  {key:'6nations',   label:'Six Nations'},
-  {key:'nc2026',     label:'Nations Championship'},
-  {key:'trc',        label:'The Rugby Championship'},
-  {key:'rwc',        label:'RWC 2027'},
-  {key:'urc',        label:'URC'},
-  {key:'prem',       label:'Premiership Rugby'},
-  {key:'top14',      label:'Top 14'},
-  {key:'prod2',      label:'Pro D2'},
-  {key:'superrugby', label:'Super Rugby Pacific'},
-  {key:'svns',       label:'SVNS World Series'},
-  {key:'ecc',        label:'Champions Cup'},
-  {key:'challenge',  label:'Challenge Cup'},
-];
+// Logos werden aus localStorage geladen
 const LS_PREFIX = 'rugby_logo_';
-
 function getLogoSrc(key) {
   try { return localStorage.getItem(LS_PREFIX + key) || null; } catch(e) { return null; }
 }
-
-function saveLogo(key, dataUrl) {
-  try { localStorage.setItem(LS_PREFIX + key, dataUrl); } catch(e) { console.warn('localStorage voll?', e); }
-}
-
 function applyLogos() {
   document.querySelectorAll('.ptab-logo').forEach(btn => {
     const key = btn.dataset.logoKey;
@@ -1140,99 +1085,11 @@ function applyLogos() {
     const src = getLogoSrc(key);
     const img = btn.querySelector('.lbadge');
     const badge = btn.querySelector('.ltxt-badge');
-    if (src && img) {
-      img.src = src;
-      img.style.display = '';
-      if (badge) badge.style.display = 'none';
-    } else if (img) {
-      img.style.display = 'none';
-      if (badge) badge.style.display = 'flex';
-    }
+    if (src && img) { img.src = src; img.style.display = ''; if (badge) badge.style.display = 'none'; }
+    else if (img) { img.style.display = 'none'; if (badge) badge.style.display = 'flex'; }
   });
 }
-
-function buildSetupGrid() {
-  const grid = document.getElementById('setupGrid');
-  grid.innerHTML = LOGO_DEFS.map(d => {
-    const existing = getLogoSrc(d.key);
-    return `<div class="setup-item ${existing?'done':''}" id="si-${d.key}">
-      ${existing
-        ? `<img class="si-preview" src="${existing}">`
-        : `<div class="si-placeholder">${d.key.substring(0,3).toUpperCase()}</div>`}
-      <div>
-        <div class="si-label">${d.label}</div>
-        <div class="si-status ${existing?'ok':''}" id="sis-${d.key}">${existing?'✓ Gespeichert':'Klicken zum Wählen'}</div>
-      </div>
-      <input type="file" accept="image/*" onchange="handleLogoFile(event,'${d.key}')">
-    </div>`;
-  }).join('');
-  updateSetupProgress();
-}
-
-function handleLogoFile(e, key) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    const dataUrl = ev.target.result;
-    saveLogo(key, dataUrl);
-    const item = document.getElementById('si-' + key);
-    const status = document.getElementById('sis-' + key);
-    if (item) {
-      item.classList.add('done');
-      const placeholder = item.querySelector('.si-placeholder');
-      if (placeholder) {
-        const img = document.createElement('img');
-        img.className = 'si-preview';
-        img.src = dataUrl;
-        placeholder.replaceWith(img);
-      } else {
-        const img = item.querySelector('.si-preview');
-        if (img) img.src = dataUrl;
-      }
-    }
-    if (status) { status.textContent = '✓ Gespeichert'; status.classList.add('ok'); }
-    updateSetupProgress();
-  };
-  reader.readAsDataURL(file);
-}
-
-function updateSetupProgress() {
-  const total = LOGO_DEFS.length;
-  const done = LOGO_DEFS.filter(d => getLogoSrc(d.key)).length;
-  const el = document.getElementById('setupProgress');
-  if (el) el.textContent = `${done} / ${total} geladen`;
-}
-
-function skipSetup() {
-  document.getElementById('setupOverlay').style.display = 'none';
-  try { localStorage.setItem('rugby_setup_done', '1'); } catch(e) {}
-}
-
-function finishSetup() {
-  applyLogos();
-  skipSetup();
-}
-
-function openSetup() {
-  buildSetupGrid();
-  document.getElementById('setupOverlay').style.display = 'flex';
-}
-
-function checkLogoSetup() {
-  const done = LOGO_DEFS.filter(d => getLogoSrc(d.key)).length;
-  const skipped = localStorage.getItem('rugby_setup_done');
-  if (done === 0 && !skipped) {
-    // First time: show setup after short delay
-    setTimeout(() => openSetup(), 800);
-  } else {
-    applyLogos();
-  }
-}
-
-// Auto-start
-loadAll();
-checkLogoSetup();
+applyLogos();
 </script>
 </body>
 </html>
