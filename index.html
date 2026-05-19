@@ -186,9 +186,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 /* source link small */
 .srclink{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-decoration:none;}
 .srclink:hover{color:var(--text);}
-
-
-</style>
+.flag-img{width:20px;height:14px;object-fit:cover;border-radius:2px;vertical-align:middle;margin-right:3px;display:inline-block;}</style>
 </head>
 <body>
 
@@ -243,59 +241,59 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <div class="pnav">
   <!-- Prio 1 -->
   <button class="ptab-logo p1 active" onclick="show('testRugby')" data-logo-key="testRugby">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/351180-d4faf5bb3c-3/ZVwKqVO3_400x400.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">Test Rugby</span>
   </button>
   <button class="ptab-logo p1" onclick="show('6nations')" data-logo-key="6nations">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/360345-b0b36f45d5-3/6nations.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">Six Nations</span>
   </button>
   <button class="ptab-logo p1" onclick="show('nc2026')" data-logo-key="nc2026">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/353714-8ddb7bd943-3/Screenshot2025-11-17112643.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">Nations Champ.</span>
   </button>
   <button class="ptab-logo p1" onclick="show('trc')" data-logo-key="trc">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/362489-98c0215757-3/TRC.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">Rugby Champ.</span>
   </button>
   <button class="ptab-logo p1" onclick="show('rwc')" data-logo-key="rwc">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/325296-925b26085d-3/RWC2027Logo.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">RWC 2027</span>
   </button>
   <div class="pdiv"></div>
   <!-- Prio 2 -->
   <button class="ptab-logo p2" onclick="show('urc')" data-logo-key="urc">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/338731-fae2983d3a-3/unnamed.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">URC</span>
   </button>
   <button class="ptab-logo p2" onclick="show('prem')" data-logo-key="prem">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/343521-70887783bc-3/2PBgulm5_400x400.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">Premiership</span>
   </button>
   <button class="ptab-logo p2" onclick="show('top14')" data-logo-key="top14">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/341850-49bd7a92c7-3/image.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">Top 14</span>
   </button>
   <button class="ptab-logo p2" onclick="show('prod2')" data-logo-key="prod2">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/341851-1ee3fac570-3/ProD2Logo.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">Pro D2</span>
   </button>
   <button class="ptab-logo p2" onclick="show('superrugby')" data-logo-key="superrugby">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/345131-b568b4827a-3/Super_Rugby_Pacific_logo.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">Super Rugby</span>
   </button>
   <button class="ptab-logo p2" onclick="show('svns')" data-logo-key="svns">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/345618-813994c18e-3/World7sLogo.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">SVNS</span>
   </button>
   <div class="pdiv"></div>
   <!-- Prio 3 -->
   <button class="ptab-logo p3" onclick="show('ecc')" data-logo-key="ecc">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/350608-70e5798532-3/vcSAuYKk_400x400.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">Champ. Cup</span>
   </button>
   <button class="ptab-logo p3" onclick="show('challenge')" data-logo-key="challenge">
-    <img class="lbadge" src="https://www.ultimaterugby.com/images/entities/350609-1ebb7d8b05-3/Otikwf_N_400x400.jpg">
+    <img class="lbadge" src="" style="display:none">
     <span class="ltxt">Challenge Cup</span>
   </button>
 </div>
@@ -576,14 +574,19 @@ const UR_SLUGS = {
 };
 
 // =================== NAV ===================
-function show(id) {
+async function show(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ptab-logo').forEach(t => t.classList.remove('active'));
   document.getElementById('sec-' + id).classList.add('active');
-  event.target.classList.add('active');
-  // lazy load
+  const btn = document.querySelector(`.ptab-logo[data-logo-key="${id}"]`) ||
+              [...document.querySelectorAll('.ptab-logo')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(`'${id}'`));
+  if (btn) btn.classList.add('active');
   if (!window.loaded) window.loaded = {};
-  if (!window.loaded[id]) { window.loaded[id] = true; loadSection(id); }
+  if (!window.loaded[id]) {
+    window.loaded[id] = true;
+    await loadSection(id);
+    setTimeout(() => renderFlags(document.getElementById('sec-' + id)), 300);
+  }
 }
 
 function switchTab(prefix, tab) {
@@ -1073,6 +1076,7 @@ async function loadAll() {
   document.getElementById('ftrTime').textContent = now.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' · ' + now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
   await loadSection('testRugby');
   window.loaded = {testRugby: true};
+  setTimeout(() => renderFlags(document.body), 300);
   btn.classList.remove('loading');
   icon.classList.remove('spin');
 }
@@ -1089,11 +1093,77 @@ function applyLogos() {
     const src = getLogoSrc(key);
     const img = btn.querySelector('.lbadge');
     const badge = btn.querySelector('.ltxt-badge');
-    if (src && img) { img.src = src; img.style.display = ''; if (badge) badge.style.display = 'none'; }
-    else if (img) { img.style.display = 'none'; if (badge) badge.style.display = 'flex'; }
+    if (src && img) {
+      img.src = src;
+      img.style.display = 'inline-block';
+      if (badge) badge.style.display = 'none';
+    } else {
+      if (img) img.style.display = 'none';
+      if (badge) badge.style.display = 'flex';
+      else if (img) {
+        // No badge defined - show key abbreviation as fallback
+        const fb = document.createElement('span');
+        fb.className = 'ltxt-badge';
+        fb.style.cssText = 'display:flex;background:var(--bg4);color:var(--muted);font-size:7px;width:18px;height:18px;border-radius:3px;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;';
+        fb.textContent = key.substring(0,3).toUpperCase();
+        img.parentNode.insertBefore(fb, img);
+      }
+    }
   });
 }
 applyLogos();
+
+// =================== FLAG RENDERING ===================
+const FLAG_MAP = {
+  '🇿🇦':'za','🇮🇪':'ie','🇳🇿':'nz','🇫🇷':'fr','🏴󠁧󠁢󠁥󠁮󠁧󠁿':'gb-eng','🇦🇷':'ar',
+  '🇦🇺':'au','🏴󠁧󠁢󠁳󠁣󠁴󠁿':'gb-sct','🏴󠁧󠁢󠁷󠁬󠁳󠁿':'gb-wls','🇮🇹':'it','🇯🇵':'jp',
+  '🇫🇯':'fj','🇬🇧':'gb','🇺🇸':'us','🇪🇸':'es','🇺🇾':'uy','🇰🇪':'ke',
+  '🇨🇦':'ca','🇬🇪':'ge','🇧🇷':'br','🇵🇹':'pt','🇷🇴':'ro','🇮🇳':'in',
+};
+
+function flagImg(code) {
+  return `<img class="flag-img" src="https://flagcdn.com/w40/${code}.png" alt="">`;
+}
+
+function renderFlags(el) {
+  if (!el) return;
+  // Skip the nav bar entirely - logos must not be touched
+  if (el.classList && el.classList.contains('pnav')) return;
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => n.parentElement.closest('.pnav') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+  });
+  const nodes = [];
+  let node;
+  while (node = walker.nextNode()) nodes.push(node);
+  nodes.forEach(n => {
+    let txt = n.textContent;
+    let changed = false;
+    for (const [emoji, code] of Object.entries(FLAG_MAP)) {
+      if (txt.includes(emoji)) {
+        txt = txt.split(emoji).join(`%%FLAG:${code}%%`);
+        changed = true;
+      }
+    }
+    if (changed) {
+      const span = document.createElement('span');
+      span.innerHTML = txt.replace(/%%FLAG:([a-z-]+)%%/g, (_, c) => flagImg(c));
+      n.parentNode.replaceChild(span, n);
+    }
+  });
+}
+
+// Observer: automatically replace flags in any newly rendered content (skip nav)
+const flagObserver = new MutationObserver(mutations => {
+  mutations.forEach(m => m.addedNodes.forEach(node => {
+    if (node.nodeType === 1 && !node.closest?.('.pnav')) renderFlags(node);
+  }));
+});
+flagObserver.observe(document.body, { childList: true, subtree: true });
+
+// Initial pass after everything loads
+window.addEventListener('load', () => {
+  document.querySelectorAll('.section').forEach(s => renderFlags(s));
+});
 </script>
 </body>
 </html>
