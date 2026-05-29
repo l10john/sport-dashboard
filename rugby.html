@@ -1786,6 +1786,9 @@ async function pushToGitHub() {
   btn.style.opacity = '';
   btn.style.pointerEvents = '';
 }
+
+// Auto-start sobald DOM bereit ist
+document.addEventListener('DOMContentLoaded', () => loadAll());
 </script>
 </body>
 </html>
