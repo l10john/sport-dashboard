@@ -248,13 +248,19 @@ function getLogo(key) {
 
 function renderSportCards() {
   const grid = document.getElementById('sportGrid');
-  const rugbyLogo = getLogo('testRugby');
   grid.innerHTML = SPORTS.map(s => {
     const isActive = s.status === 'active';
     const isNext = s.status === 'next';
-    const iconHtml = s.id === 'rugby' && rugbyLogo
-      ? `<img src="${rugbyLogo}" alt="Rugby">`
-      : `<span style="font-size:26px;">${s.icon}</span>`;
+    // Rugby: use icon.png (always available in repo), localStorage logos as enhancement
+    let iconHtml;
+    if (s.id === 'rugby') {
+      const storedLogo = getLogo('testRugby') || getLogo('urc');
+      iconHtml = storedLogo
+        ? `<img src="${storedLogo}" alt="Rugby" style="width:38px;height:38px;object-fit:contain;border-radius:7px;">`
+        : `<img src="icon.png" alt="Rugby" style="width:38px;height:38px;object-fit:contain;border-radius:7px;" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🏉',style:'font-size:26px'}))">`;
+    } else {
+      iconHtml = `<span style="font-size:26px;">${s.icon}</span>`;
+    }
     return `<a class="sport-card ${isActive?'active':''} ${s.status==='soon'?'soon':''}"
       href="${isActive?s.url:'#'}"
       onclick="${isActive?'':'return false'}">
