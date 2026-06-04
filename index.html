@@ -192,10 +192,10 @@ const SPORTS = [
     comp:'URC · Six Nations · NC2026 · SVNS',
   },
   {
-    id:'cricket', label:'Cricket', desc:'Test · ODI · T20 · IPL · The Hundred',
-    status:'next', badge:'COMING SOON', url:'cricket.html',
+    id:'cricket', label:'Cricket', desc:'Test · ODI · T20I · IPL · The Hundred',
+    status:'active', badge:'AKTIV', url:'cricket.html#testOverview',
     accent:'#3ab4f5', icon:'🏏',
-    comp:'In Entwicklung',
+    comp:'Test · WTC · Eng Summer 2026 · IPL',
   },
   {
     id:'tennis', label:'Tennis', desc:'Grand Slams · ATP · WTA Tour',
@@ -254,10 +254,15 @@ function renderSportCards() {
     // Rugby: use icon.png (always available in repo), localStorage logos as enhancement
     let iconHtml;
     if (s.id === 'rugby') {
-      const storedLogo = getLogo('testRugby') || getLogo('urc');
+      const storedLogo = getLogo('testRugby');
       iconHtml = storedLogo
         ? `<img src="${storedLogo}" alt="Rugby" style="width:38px;height:38px;object-fit:contain;border-radius:7px;">`
-        : `<img src="icon.png" alt="Rugby" style="width:38px;height:38px;object-fit:contain;border-radius:7px;" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'🏉',style:'font-size:26px'}))">`;
+        : `<span style="font-size:26px;">🏉</span>`;
+    } else if (s.id === 'cricket') {
+      const storedLogo = getLogo('cricket');
+      iconHtml = storedLogo
+        ? `<img src="${storedLogo}" alt="Cricket" style="width:38px;height:38px;object-fit:contain;border-radius:7px;">`
+        : `<span style="font-size:26px;">🏏</span>`;
     } else {
       iconHtml = `<span style="font-size:26px;">${s.icon}</span>`;
     }
@@ -281,22 +286,13 @@ function renderSportCards() {
 // =================== LATEST RESULTS ===================
 const LATEST = [
   {sport:'RUGBY', comp:'Champions Cup · Finale', date:'23. Mai 2026',
-   matches:[
-     {home:'Bordeaux-Bègles',away:'Leinster',sh:'41',sa:'19',w:'home'},
-   ]},
+   matches:[{home:'Bordeaux-Bègles',away:'Leinster',sh:'41',sa:'19',w:'home'}]},
   {sport:'RUGBY', comp:'Challenge Cup · Finale', date:'23. Mai 2026',
-   matches:[
-     {home:'Montpellier',away:'Ulster',sh:'59',sa:'26',w:'home'},
-   ]},
-  {sport:'RUGBY', comp:'Six Nations 2026 · R5', date:'14. Mär 2026',
-   matches:[
-     {home:'Frankreich',away:'England',sh:'48',sa:'46',w:'home'},
-     {home:'Irland',away:'Schottland',sh:'43',sa:'21',w:'home'},
-   ]},
-  {sport:'RUGBY', comp:'SVNS · Grand Final LA', date:'4. Mai 2025',
-   matches:[
-     {home:'Südafrika',away:'Spanien',sh:'19',sa:'5',w:'home'},
-   ]},
+   matches:[{home:'Montpellier',away:'Ulster',sh:'59',sa:'26',w:'home'}]},
+  {sport:'CRICKET', comp:'T20 World Cup · Finale', date:'7. Mär 2026',
+   matches:[{home:'🇮🇳 Indien',away:'🇿🇦 Südafrika',sh:'176/6',sa:'170/8',w:'home'}]},
+  {sport:'CRICKET', comp:'IPL 2026 · Finale', date:'1. Jun 2026',
+   matches:[{home:'Mumbai Indians',away:'Chennai Super Kings',sh:'183/5',sa:'177/8',w:'home'}]},
 ];
 
 function renderResults() {
@@ -326,13 +322,15 @@ function renderResults() {
 
 // =================== UPCOMING ===================
 const UPCOMING = [
+  {date:'2026-06-04',sport:'CRICKET',sportColor:'var(--acc2)',match:'England vs Neuseeland · 1. Test',comp:'Crowe-Thorpe Trophy · Lord\'s 🔴 LIVE'},
   {date:'2026-06-06',sport:'RUGBY',sportColor:'var(--acc)',match:'URC Playoffs · QF',comp:'United Rugby Championship'},
-  {date:'2026-06-07',sport:'RUGBY',sportColor:'var(--acc)',match:'Premiership HF 1 & 2',comp:'Gallagher Premiership · Twickenham'},
-  {date:'2026-06-13',sport:'RUGBY',sportColor:'var(--acc)',match:'Top 14 Viertelfinale',comp:'Top 14 · Stade de France'},
-  {date:'2026-06-20',sport:'RUGBY',sportColor:'var(--acc)',match:'Super Rugby Grand Final',comp:'Super Rugby Pacific'},
+  {date:'2026-06-17',sport:'CRICKET',sportColor:'var(--acc2)',match:'England vs Neuseeland · 2. Test',comp:'Crowe-Thorpe Trophy · The Oval'},
   {date:'2026-06-20',sport:'RUGBY',sportColor:'var(--acc)',match:'Premiership Finale',comp:'Gallagher Premiership · Twickenham'},
+  {date:'2026-06-25',sport:'CRICKET',sportColor:'var(--acc2)',match:'England vs Neuseeland · 3. Test',comp:'Crowe-Thorpe Trophy · Trent Bridge'},
   {date:'2026-06-27',sport:'RUGBY',sportColor:'var(--acc)',match:'Top 14 Finale',comp:'Top 14 · Stade de France'},
+  {date:'2026-07-02',sport:'CRICKET',sportColor:'var(--acc2)',match:'England vs Indien · 1. Test',comp:'England Home Summer · Lord\'s'},
   {date:'2026-07-04',sport:'RUGBY',sportColor:'var(--acc)',match:'Nations Championship · Runde 1',comp:'NC2026 · Southern Series Start'},
+  {date:'2026-07-24',sport:'CRICKET',sportColor:'var(--acc2)',match:'The Hundred 2026 · Start',comp:'The Hundred · The Oval'},
 ];
 
 function renderUpcoming() {
@@ -354,9 +352,11 @@ function renderUpcoming() {
 }
 
 // =================== INIT ===================
-renderSportCards();
-renderResults();
-renderUpcoming();
+document.addEventListener('DOMContentLoaded', () => {
+  renderSportCards();
+  renderResults();
+  renderUpcoming();
+});
 </script>
 </body>
 </html>

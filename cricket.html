@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cricket Dashboard</title>
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sport">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;--bg2:#13161d;--bg3:#1a1e28;--bg4:#222636;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#e8eaf0;--muted:#7a7f96;
+  --p1:#3ab4f5;--p1bg:rgba(58,180,245,0.12);
+  --p2:#c8f53a;--p2bg:rgba(200,245,58,0.12);
+  --p3:#f5a03a;--p3bg:rgba(245,160,58,0.12);
+  --win:#3af5a0;--loss:#f53a6e;--draw:#f5a03a;--live:#f53a6e;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:100;}
+.hdr-l{display:flex;align-items:center;gap:10px;}
+.logo{width:36px;height:36px;background:var(--p1);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;color:#0d0f14;}
+.hdr h1{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;}
+.hdr h1 span{color:var(--p1);}
+.hdr-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:1px;}
+.hdr-r{display:flex;align-items:center;gap:8px;}
+.updated{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+.btn-ref{background:var(--p1);color:#0d0f14;border:none;border-radius:6px;padding:7px 14px;font-weight:600;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:opacity .2s;}
+.btn-ref:hover{opacity:.85;}
+.btn-ref.loading{opacity:.5;pointer-events:none;}
+#ghBtn{width:34px;height:34px;padding:0;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--muted);cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+
+/* NAV */
+.pnav{display:flex;align-items:center;gap:4px;padding:8px 24px;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto;flex-wrap:nowrap;}
+.ptab{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:1px solid transparent;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;background:none;color:var(--muted);transition:all .15s;}
+.ptab:hover{color:var(--text);background:var(--bg3);}
+.ptab.p1.active{background:var(--p1bg);color:var(--p1);border-color:rgba(58,180,245,.3);}
+.ptab.p2.active{background:var(--p2bg);color:var(--p2);border-color:rgba(200,245,58,.3);}
+.ptab.p3.active{background:var(--p3bg);color:var(--p3);border-color:rgba(245,160,58,.3);}
+.pdiv{width:1px;height:16px;background:var(--border2);margin:0 4px;flex-shrink:0;}
+.prio-badge{font-size:9px;font-family:'DM Mono',monospace;padding:1px 5px;border-radius:3px;}
+.prio-badge.p1{background:var(--p1bg);color:var(--p1);}
+.prio-badge.p2{background:var(--p2bg);color:var(--p2);}
+.prio-badge.p3{background:var(--p3bg);color:var(--p3);}
+
+/* MAIN */
+.main{padding:18px 24px;max-width:1400px;}
+.section{display:none;}
+.section.active{display:block;}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;justify-content:space-between;margin:20px 0 12px;}
+.sh:first-child{margin-top:0;}
+.sh-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--muted);display:flex;align-items:center;gap:7px;}
+.sh-dot{width:7px;height:7px;border-radius:50%;background:var(--p1);display:inline-block;flex-shrink:0;}
+.sh-dot.p2{background:var(--p2);}
+.sh-dot.p3{background:var(--p3);}
+.sh-link{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-decoration:none;border:1px solid var(--border2);padding:3px 8px;border-radius:4px;}
+.sh-link:hover{color:var(--text);}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr;}}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
+.card.p1-accent{border-top:2px solid var(--p1);}
+.card.p2-accent{border-top:2px solid var(--p2);}
+.card.p3-accent{border-top:2px solid var(--p3);}
+.ch{padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:space-between;}
+.ct{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;display:flex;align-items:center;gap:6px;}
+.cs{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+
+/* INNER TABS */
+.itabs{display:flex;border-bottom:1px solid var(--border);}
+.itab{padding:7px 12px;font-size:12px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;transition:all .15s;white-space:nowrap;}
+.itab:hover{color:var(--text);}
+.itab.p1.active{color:var(--p1);border-bottom-color:var(--p1);}
+.itab.p2.active{color:var(--p2);border-bottom-color:var(--p2);}
+.itab.p3.active{color:var(--p3);border-bottom-color:var(--p3);}
+.icp{display:none;}
+.icp.active{display:block;}
+
+/* MATCH ROW - Cricket specific */
+.mr{padding:10px 14px;border-bottom:1px solid var(--border);transition:background .1s;cursor:default;}
+.mr:last-child{border-bottom:none;}
+.mr:hover{background:var(--bg3);}
+.mr-teams{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.mr-team{font-size:13px;font-weight:500;}
+.mr-team.w{color:var(--win);font-weight:600;}
+.mr-score{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);}
+.mr-score.w{color:var(--win);}
+.mr-meta{font-size:11px;color:var(--muted);margin-top:3px;}
+.mr-result{font-size:11px;font-weight:500;color:var(--win);}
+.mr-result.loss{color:var(--loss);}
+.mr-result.draw{color:var(--draw);}
+.live-badge{font-size:10px;font-family:'DM Mono',monospace;padding:2px 7px;border-radius:4px;background:rgba(245,58,110,.15);color:var(--live);border:1px solid rgba(245,58,110,.3);display:inline-flex;align-items:center;gap:4px;}
+.ldot{width:5px;height:5px;border-radius:50%;background:var(--live);animation:pulse 1.2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.spin{animation:spin 1s linear infinite;}
+
+/* FIXTURE ROW */
+.fr{display:grid;grid-template-columns:54px 1fr;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);gap:10px;}
+.fr:last-child{border-bottom:none;}
+.fd{text-align:center;background:var(--bg4);border-radius:5px;padding:4px 0;}
+.fd-d{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text);line-height:1;}
+.fd-m{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;}
+.fm{font-size:13px;font-weight:500;}
+.fc{font-size:11px;color:var(--muted);margin-top:1px;}
+
+/* STANDINGS */
+.stbl{width:100%;border-collapse:collapse;}
+.stbl th{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:7px 5px 5px;border-bottom:1px solid var(--border);font-weight:400;letter-spacing:.5px;}
+.stbl th:nth-child(1),.stbl th:nth-child(2){text-align:left;}
+.stbl th:nth-child(1){padding-left:14px;}
+.stbl td{padding:7px 5px;text-align:center;font-size:13px;border-bottom:1px solid var(--border);color:var(--text);}
+.stbl tr:last-child td{border-bottom:none;}
+.stbl tr:hover td{background:var(--bg3);}
+.stbl td:nth-child(1){padding-left:14px;}
+.stbl td:nth-child(2){text-align:left;font-weight:500;}
+.pos{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--muted);background:var(--bg4);}
+.pos.q{background:var(--p1bg);color:var(--p1);}
+.pos.q2{background:rgba(58,180,245,.25);color:var(--p1);}
+.pts{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--p1);}
+.pct{font-family:'DM Mono',monospace;font-size:12px;color:var(--p1);}
+
+/* ROUND HEADER */
+.rnd-hdr{padding:5px 14px 3px;font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);background:var(--bg3);border-bottom:1px solid var(--border);letter-spacing:.5px;}
+.rnd-hdr.p1{color:var(--p1);}
+.rnd-hdr.p2{color:var(--p2);}
+.rnd-hdr.p3{color:var(--p3);}
+
+/* STATUS ROWS */
+.cr{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);gap:8px;}
+.cr:last-child{border-bottom:none;}
+.ce{font-size:13px;font-weight:500;}
+.cm{font-size:11px;color:var(--muted);margin-top:1px;}
+.cst{font-size:11px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:4px;white-space:nowrap;}
+.cst.done{background:var(--bg4);color:var(--muted);}
+.cst.live{background:rgba(245,58,110,.15);color:var(--live);border:1px solid rgba(245,58,110,.3);}
+.cst.next{background:var(--p1bg);color:var(--p1);border:1px solid rgba(58,180,245,.3);}
+.cst.soon{background:var(--p3bg);color:var(--p3);border:1px solid rgba(245,160,58,.3);}
+
+/* LOADING */
+.ld{padding:24px;text-align:center;color:var(--muted);font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.ldspn{border:2px solid var(--border2);border-top-color:var(--p1);width:14px;height:14px;border-radius:50%;}
+.empty{padding:16px;text-align:center;color:var(--muted);font-size:12px;}
+
+/* BANNER */
+.banner{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.tile{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.tl{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.5px;}
+.tv{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--p1);line-height:1.1;margin-top:2px;}
+.ts{font-size:11px;color:var(--muted);margin-top:1px;}
+@media(max-width:700px){.banner{grid-template-columns:repeat(2,1fr);}}
+
+/* FLAG */
+.flag-img{width:20px;height:14px;object-fit:cover;border-radius:2px;vertical-align:middle;margin-right:3px;}
+
+/* FOOTER */
+.ftr{padding:14px 24px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;display:flex;justify-content:space-between;margin-top:28px;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-l">
+    <a href="index.html" title="Sport Dashboard" style="width:34px;height:34px;border-radius:7px;border:1px solid var(--border2);background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);text-decoration:none;flex-shrink:0;transition:all .15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </a>
+    <div class="logo">🏏</div>
+    <div>
+      <h1>CRICKET <span>DASHBOARD</span></h1>
+      <div class="hdr-sub">Test · ODI · T20I · Persönliches Cricket-Informationssystem</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <div class="updated" id="upd">Noch nicht geladen</div>
+    <button class="btn-ref" id="refBtn" onclick="loadAll()">
+      <svg id="refIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      Aktualisieren
+    </button>
+    <button id="ghBtn" onclick="pushToGitHub()" title="Update auf GitHub" style="display:none;width:34px;height:34px;padding:0;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--muted);cursor:pointer;align-items:center;justify-content:center;flex-shrink:0;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="pnav">
+  <button class="ptab p1 active" data-sec="testOverview" onclick="show('testOverview')">🌍 Test Overview</button>
+  <button class="ptab p1" data-sec="engNZ2026" onclick="show('engNZ2026')">🏏 ENG vs NZ 2026</button>
+  <button class="ptab p1" data-sec="wtc" onclick="show('wtc')">🏆 WTC 2025–27</button>
+  <div class="pdiv"></div>
+  <button class="ptab p2" data-sec="t20wc2026" onclick="show('t20wc2026')">⚡ T20 WC 2026</button>
+  <button class="ptab p2" data-sec="engSummer" onclick="show('engSummer')">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Eng Summer</button>
+  <div class="pdiv"></div>
+  <button class="ptab p3" data-sec="ipl2026" onclick="show('ipl2026')">🇮🇳 IPL 2026</button>
+  <button class="ptab p3" data-sec="thehundred" onclick="show('thehundred')">💯 The Hundred</button>
+</div>
+
+<!-- TEST OVERVIEW -->
+<div class="main section active" id="sec-testOverview">
+  <div class="banner">
+    <div class="tile"><div class="tl">LIVE JETZT</div><div class="tv" id="tb-live">1</div><div class="ts">ENG vs NZ · Lord's</div></div>
+    <div class="tile"><div class="tl">WTC LEADER</div><div class="tv" style="font-size:18px;padding-top:4px;">🇦🇺</div><div class="ts">Australien · 87.5%</div></div>
+    <div class="tile"><div class="tl">ENG SUMMER</div><div class="tv" style="font-size:14px;padding-top:6px;">NZ·IND·PAK·SL</div><div class="ts">4 Gegner 2026</div></div>
+    <div class="tile"><div class="tl">WTC FINALE</div><div class="tv" style="font-size:16px;padding-top:4px;">LORD'S</div><div class="ts">Juni 2027</div></div>
+  </div>
+
+  <div class="sh"><div class="sh-title"><span class="sh-dot"></span> Aktuelle Test-Serien <span class="prio-badge p1">P1</span></div><a class="sh-link" href="https://www.espncricinfo.com" target="_blank">espncricinfo.com ↗</a></div>
+  <div class="g2">
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">🔴 LIVE – ENG vs NZ · Lord's</div><div class="cs">Crowe-Thorpe Trophy · 1. Test</div></div>
+      <div id="live-match">
+        <div class="mr">
+          <div class="mr-teams"><span class="mr-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</span><span class="mr-score">TBD</span></div>
+          <div class="mr-teams"><span class="mr-team">🇳🇿 Neuseeland</span><span class="mr-score">TBD</span></div>
+          <div class="mr-meta"><span class="live-badge"><span class="ldot"></span>LIVE · Day 1 · Lord's, London</span></div>
+        </div>
+        <div class="rnd-hdr p1">SERIE: CROWE-THORPE TROPHY 2026 · ENG FÜHRT 0–0</div>
+        <div class="fr"><div class="fd"><div class="fd-d">4</div><div class="fd-m">JUN</div></div><div><div class="fm">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇳🇿 Neuseeland</div><div class="fc">1. Test · Lord's · 4.–8. Jun 2026</div></div></div>
+        <div class="fr"><div class="fd"><div class="fd-d">17</div><div class="fd-m">JUN</div></div><div><div class="fm">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇳🇿 Neuseeland</div><div class="fc">2. Test · The Oval · 17.–21. Jun 2026</div></div></div>
+        <div class="fr"><div class="fd"><div class="fd-d">25</div><div class="fd-m">JUN</div></div><div><div class="fm">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇳🇿 Neuseeland</div><div class="fc">3. Test · Trent Bridge · 25.–29. Jun 2026</div></div></div>
+      </div>
+    </div>
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">Weitere laufende Tests</div><div class="cs">Stand: 4. Jun 2026</div></div>
+      <div class="rnd-hdr p1">WEST INDIES vs SRI LANKA · 1st TEST</div>
+      <div class="mr">
+        <div class="mr-teams"><span class="mr-team">🇱🇨 West Indies</span><span class="mr-score">TBD</span></div>
+        <div class="mr-teams"><span class="mr-team">🇱🇰 Sri Lanka</span><span class="mr-score">TBD</span></div>
+        <div class="mr-meta"><span class="live-badge"><span class="ldot"></span>LIVE · North Sound, Antigua</span></div>
+      </div>
+      <div class="rnd-hdr p1">ZIMBABWE vs BANGLADESH · ONLY TEST</div>
+      <div class="mr">
+        <div class="mr-teams"><span class="mr-team">🇿🇼 Zimbabwe</span><span class="mr-score">TBD</span></div>
+        <div class="mr-teams"><span class="mr-team">🇧🇩 Bangladesh</span><span class="mr-score">TBD</span></div>
+        <div class="mr-meta"><span class="live-badge"><span class="ldot"></span>LIVE · Harare Sports Club</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sh"><div class="sh-title"><span class="sh-dot"></span> ICC Test Rankings <span class="prio-badge p1">P1</span></div></div>
+  <div class="g2">
+    <div class="card p1-accent" id="testRankings"></div>
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">Nächste anstehende Tests</div><div class="cs">Juni–September 2026</div></div>
+      <div id="upcomingTests"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ENG vs NZ 2026 -->
+<div class="main section" id="sec-engNZ2026">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot"></span> Crowe-Thorpe Trophy 2026 <span class="prio-badge p1">P1</span></div><a class="sh-link" href="https://www.espncricinfo.com/series/new-zealand-in-england-2026-1496491" target="_blank">espncricinfo.com ↗</a></div>
+  <div class="g2">
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">Serie – 3 Tests</div><div class="cs" id="nz-series-status">🔴 LIVE · Test 1 läuft</div></div>
+      <div id="nz-series"></div>
+    </div>
+    <div class="card p1-accent">
+      <div class="itabs">
+        <button class="itab p1 active" onclick="switchTab('nz','results')">Ergebnisse</button>
+        <button class="itab p1" onclick="switchTab('nz','fixtures')">Fixtures</button>
+        <button class="itab p1" onclick="switchTab('nz','squads')">Kader</button>
+      </div>
+      <div id="nz-results" class="icp active"></div>
+      <div id="nz-fixtures" class="icp"></div>
+      <div id="nz-squads" class="icp"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WTC -->
+<div class="main section" id="sec-wtc">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot"></span> ICC World Test Championship 2025–27 <span class="prio-badge p1">P1</span></div><a class="sh-link" href="https://www.espncricinfo.com/series/icc-world-test-championship-2025-2027-1472510" target="_blank">espncricinfo.com ↗</a></div>
+  <div class="g2">
+    <div class="card p1-accent">
+      <div class="ch"><div class="ct">Tabelle · PCT-System</div><div class="cs">Stand: Jun 2026 · Finale Jun 2027 Lord's</div></div>
+      <div id="wtc-table"></div>
+    </div>
+    <div class="card p1-accent">
+      <div class="itabs">
+        <button class="itab p1 active" onclick="switchTab('wtc','schedule')">Anstehende Tests</button>
+        <button class="itab p1" onclick="switchTab('wtc','info')">Über WTC</button>
+      </div>
+      <div id="wtc-schedule" class="icp active"></div>
+      <div id="wtc-info" class="icp"></div>
+    </div>
+  </div>
+</div>
+
+<!-- T20 WC 2026 -->
+<div class="main section" id="sec-t20wc2026">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p2"></span> ICC Men's T20 World Cup 2026 <span class="prio-badge p2">P2</span></div><a class="sh-link" href="https://www.espncricinfo.com" target="_blank">espncricinfo.com ↗</a></div>
+  <div class="g2">
+    <div class="card p2-accent">
+      <div class="ch"><div class="ct">🏆 Abgeschlossen · Gastgeber: IND & SL</div><div class="cs">Feb–Mär 2026</div></div>
+      <div id="t20wc-result"></div>
+    </div>
+    <div class="card p2-accent">
+      <div class="itabs">
+        <button class="itab p2 active" onclick="switchTab('t20wc','groups')">Gruppen</button>
+        <button class="itab p2" onclick="switchTab('t20wc','knockout')">Knockout</button>
+      </div>
+      <div id="t20wc-groups" class="icp active"></div>
+      <div id="t20wc-knockout" class="icp"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ENG SUMMER FULL -->
+<div class="main section" id="sec-engSummer">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p2"></span> England Home Summer 2026 <span class="prio-badge p2">P2</span></div><a class="sh-link" href="https://www.ecb.co.uk" target="_blank">ecb.co.uk ↗</a></div>
+  <div class="g2">
+    <div class="card p2-accent">
+      <div class="ch"><div class="ct">Alle Fixtures · Tests</div><div class="cs">Jun–Sep 2026</div></div>
+      <div id="eng-tests"></div>
+    </div>
+    <div class="card p2-accent">
+      <div class="ch"><div class="ct">White Ball · T20I & ODI</div><div class="cs">Jul–Sep 2026</div></div>
+      <div id="eng-whiteball"></div>
+    </div>
+  </div>
+</div>
+
+<!-- IPL 2026 -->
+<div class="main section" id="sec-ipl2026">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p3"></span> Indian Premier League 2026 <span class="prio-badge p3">P3</span></div><a class="sh-link" href="https://www.iplt20.com" target="_blank">iplt20.com ↗</a></div>
+  <div class="g2">
+    <div class="card p3-accent">
+      <div class="ch"><div class="ct">Abschlusstabelle 2026</div><div class="cs" id="ipl-date">Apr–Jun 2026</div></div>
+      <div id="ipl-table"></div>
+    </div>
+    <div class="card p3-accent">
+      <div class="itabs">
+        <button class="itab p3 active" onclick="switchTab('ipl','knockout')">Playoff-Ergebnisse</button>
+        <button class="itab p3" onclick="switchTab('ipl','info')">Infos</button>
+      </div>
+      <div id="ipl-knockout" class="icp active"></div>
+      <div id="ipl-info" class="icp"></div>
+    </div>
+  </div>
+</div>
+
+<!-- THE HUNDRED -->
+<div class="main section" id="sec-thehundred">
+  <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot p3"></span> The Hundred 2026 <span class="prio-badge p3">P3</span></div><a class="sh-link" href="https://www.thehundred.com" target="_blank">thehundred.com ↗</a></div>
+  <div class="g2">
+    <div class="card p3-accent">
+      <div class="ch"><div class="ct">Men's Standings</div><div class="cs" id="hundred-date">Jul–Aug 2026</div></div>
+      <div id="hundred-table"></div>
+    </div>
+    <div class="card p3-accent">
+      <div class="itabs">
+        <button class="itab p3 active" onclick="switchTab('hundred','fixtures')">Fixtures</button>
+        <button class="itab p3" onclick="switchTab('hundred','results')">Ergebnisse</button>
+      </div>
+      <div id="hundred-fixtures" class="icp active"></div>
+      <div id="hundred-results" class="icp"></div>
+    </div>
+  </div>
+</div>
+
+<div class="ftr">
+  <span>Cricket Dashboard v1.0 · Daten: ESPNcricinfo · ECB · ICC</span>
+  <span id="ftrTime">–</span>
+</div>
+
+<script>
+// =================== NAV ===================
+async function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  const btn = document.querySelector(`.ptab[data-sec="${id}"]`);
+  if (btn) btn.classList.add('active');
+  if (!window.loaded) window.loaded = {};
+  if (!window.loaded[id]) { window.loaded[id] = true; await loadSection(id); }
+}
+
+function switchTab(prefix, tab) {
+  const clickedTab = event.target.closest('.itab') || event.target;
+  const card = clickedTab.closest('.card');
+  if (!card) return;
+  card.querySelectorAll('.itab').forEach(t => t.classList.remove('active'));
+  card.querySelectorAll('.icp').forEach(p => p.classList.remove('active'));
+  clickedTab.classList.add('active');
+  const target = document.getElementById(`${prefix}-${tab}`);
+  if (target) target.classList.add('active');
+}
+
+function fmtD(d) { const dt=new Date(d); return dt.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}); }
+function fmtDL(d) { const dt=new Date(d); return dt.toLocaleDateString('de-DE',{day:'2-digit',month:'short'}); }
+function fixtureRow(team1, team2, date, time, venue, format) {
+  const dt = new Date(date);
+  return `<div class="fr">
+    <div class="fd"><div class="fd-d">${dt.getDate()}</div><div class="fd-m">${dt.toLocaleDateString('de-DE',{month:'short'}).toUpperCase()}</div></div>
+    <div><div class="fm">${team1} vs ${team2}</div><div class="fc">${venue}${time?' · '+time:''}${format?' · '+format:''}</div></div>
+  </div>`;
+}
+function matchRow(team1, score1, team2, score2, result, venue, date, format) {
+  return `<div class="mr">
+    <div class="mr-teams"><span class="mr-team">${team1}</span><span class="mr-score">${score1||'–'}</span></div>
+    <div class="mr-teams"><span class="mr-team">${team2}</span><span class="mr-score">${score2||'–'}</span></div>
+    <div class="mr-meta">${result?`<span class="mr-result">${result}</span> · `:''}<span>${venue||''}</span>${date?` · ${fmtD(date)}`:''}</div>
+  </div>`;
+}
+function standingsTable(rows, ptsKey='pct', ptsLabel='PCT%', ptsColor='var(--p1)') {
+  return `<div style="overflow-x:auto"><table class="stbl">
+    <thead><tr><th>#</th><th>Team</th><th>M</th><th>W</th><th>L</th><th>D</th><th>${ptsLabel}</th></tr></thead>
+    <tbody>${rows.map((t,i)=>{
+      const pos=i+1,q=pos<=2;
+      return `<tr>
+        <td><span class="pos ${q?'q2':''}">${pos}</span></td>
+        <td>${t.team}</td><td>${t.m}</td><td style="color:var(--win)">${t.w}</td>
+        <td style="color:var(--loss)">${t.l}</td><td style="color:var(--draw)">${t.d}</td>
+        <td><span class="pct" style="color:${ptsColor}">${t[ptsKey]}</span></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+// =================== DATA ===================
+
+function loadTestOverview() {
+  // ICC Test Rankings (Stand Jun 2026)
+  const rankings = [
+    {pos:1,team:'🇦🇺 Australien',rating:'122'},
+    {pos:2,team:'🇳🇿 Neuseeland',rating:'108'},
+    {pos:3,team:'🇿🇦 Südafrika',rating:'105'},
+    {pos:4,team:'🇱🇰 Sri Lanka',rating:'98'},
+    {pos:5,team:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',rating:'94'},
+    {pos:6,team:'🇮🇳 Indien',rating:'92'},
+    {pos:7,team:'🇵🇰 Pakistan',rating:'88'},
+    {pos:8,team:'🇧🇩 Bangladesch',rating:'75'},
+    {pos:9,team:'🇼🇸 West Indies',rating:'62'},
+    {pos:10,team:'🇿🇼 Zimbabwe',rating:'44'},
+  ];
+  document.getElementById('testRankings').innerHTML = `
+    <div class="ch"><div class="ct">ICC Test Rankings</div><div class="cs">Stand: Jun 2026</div></div>
+    <table class="stbl"><thead><tr><th>#</th><th>Nation</th><th>Rating</th></tr></thead>
+    <tbody>${rankings.map(r=>`<tr>
+      <td><span class="pos ${r.pos<=2?'q2':r.pos<=4?'q':''}">${r.pos}</span></td>
+      <td>${r.team}</td>
+      <td><span class="pct">${r.rating}</span></td>
+    </tr>`).join('')}</tbody></table>`;
+
+  // Upcoming Tests
+  const upcoming = [
+    {t1:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',t2:'🇳🇿 Neuseeland',d:'2026-06-17',v:'The Oval',f:'Test 2'},
+    {t1:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',t2:'🇳🇿 Neuseeland',d:'2026-06-25',v:'Trent Bridge',f:'Test 3'},
+    {t1:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',t2:'🇮🇳 Indien',d:'2026-07-02',v:'Lord\'s',f:'1. Test'},
+    {t1:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',t2:'🇮🇳 Indien',d:'2026-07-16',v:'Headingley',f:'2. Test'},
+    {t1:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',t2:'🇮🇳 Indien',d:'2026-07-30',v:'Edgbaston',f:'3. Test'},
+  ];
+  document.getElementById('upcomingTests').innerHTML = upcoming.map(u => fixtureRow(u.t1,u.t2,u.d,'10:00 BST',u.v,u.f)).join('');
+}
+
+function loadEngNZ() {
+  // Serie Overview
+  document.getElementById('nz-series').innerHTML = `
+    <div class="rnd-hdr p1">CROWE-THORPE TROPHY 2026 · ENGLAND VS NEUSEELAND</div>
+    <div class="cr"><div><div class="ce">🏏 1. Test · Lord's</div><div class="cm">4.–8. Juni 2026 · Home of Cricket</div></div><span class="cst live"><span class="ldot" style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--live);animation:pulse 1.2s ease-in-out infinite;margin-right:4px;"></span>LIVE</span></div>
+    <div class="cr"><div><div class="ce">🏏 2. Test · The Oval</div><div class="cm">17.–21. Juni 2026 · London</div></div><span class="cst soon">Anstehend</span></div>
+    <div class="cr"><div><div class="ce">🏏 3. Test · Trent Bridge</div><div class="cm">25.–29. Juni 2026 · Nottingham</div></div><span class="cst soon">Anstehend</span></div>
+    <div style="padding:10px 14px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;border-top:1px solid var(--border);">
+      Trophäe benannt nach Martin Crowe (NZL) & Graham Thorpe (ENG) · Aktueller Halter: England (2024/25)
+    </div>`;
+
+  document.getElementById('nz-results').innerHTML = `
+    <div class="rnd-hdr p1">1. TEST · LORD'S · 4.–8. JUN 2026</div>
+    <div class="mr">
+      <div class="mr-teams"><span class="mr-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</span><span class="mr-score live-badge"><span class="ldot"></span>Läuft</span></div>
+      <div class="mr-teams"><span class="mr-team">🇳🇿 Neuseeland</span><span class="mr-score">–</span></div>
+      <div class="mr-meta">Day 1 · Live auf Sky Sports & TNT Sports</div>
+    </div>`;
+
+  document.getElementById('nz-fixtures').innerHTML = [
+    {n:'1. Test',d:'2026-06-04',v:"Lord's, London",days:'4.–8. Jun'},
+    {n:'2. Test',d:'2026-06-17',v:'The Oval, London',days:'17.–21. Jun'},
+    {n:'3. Test',d:'2026-06-25',v:'Trent Bridge, Nottingham',days:'25.–29. Jun'},
+  ].map(f=>`<div class="fr">
+    <div class="fd"><div class="fd-d">${new Date(f.d).getDate()}</div><div class="fd-m">${new Date(f.d).toLocaleDateString('de-DE',{month:'short'}).toUpperCase()}</div></div>
+    <div><div class="fm">${f.n} · 🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇳🇿 Neuseeland</div><div class="fc">${f.v} · ${f.days} · 10:00 BST</div></div>
+  </div>`).join('');
+
+  document.getElementById('nz-squads').innerHTML = `
+    <div class="rnd-hdr p1">🏴󠁧󠁢󠁥󠁮󠁧󠁿 ENGLAND KADER</div>
+    <div style="padding:10px 14px;font-size:12px;color:var(--text);line-height:1.8;">
+      <strong>Batting:</strong> Zak Crawley, Ben Duckett, Ollie Pope, Joe Root, Harry Brook (c), Jamie Smith (wk)<br>
+      <strong>Allrounder:</strong> Ben Stokes, Chris Woakes<br>
+      <strong>Bowling:</strong> Gus Atkinson, Mark Wood, Brydon Carse, Josh Tongue, Shoaib Bashir
+    </div>
+    <div class="rnd-hdr p1">🇳🇿 NEUSEELAND KADER</div>
+    <div style="padding:10px 14px;font-size:12px;color:var(--text);line-height:1.8;">
+      <strong>Batting:</strong> Tom Latham (c), Devon Conway, Kane Williamson, Rachin Ravindra, Daryl Mitchell, Tom Blundell (wk)<br>
+      <strong>Allrounder:</strong> Glenn Phillips, Michael Bracewell, Mitchell Santner<br>
+      <strong>Bowling:</strong> Matt Henry, William O'Rourke, Kyle Jamieson, Tim Southee
+    </div>`;
+}
+
+function loadWTC() {
+  // WTC 2025-27 Tabelle (Stand nach Ashes + aktuellen Serien Jun 2026)
+  const wtcTable = [
+    {team:'🇦🇺 Australien',m:'8',w:'7',l:'1',d:'0',pct:'87.50'},
+    {team:'🇳🇿 Neuseeland',m:'3',w:'2',l:'0',d:'1',pct:'77.78'},
+    {team:'🇿🇦 Südafrika',m:'4',w:'3',l:'1',d:'0',pct:'75.00'},
+    {team:'🇱🇰 Sri Lanka',m:'4',w:'2',l:'1',d:'1',pct:'58.33'},
+    {team:'🇮🇳 Indien',m:'9',w:'5',l:'3',d:'1',pct:'57.41'},
+    {team:'🇵🇰 Pakistan',m:'4',w:'2',l:'2',d:'0',pct:'50.00'},
+    {team:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',m:'7',w:'2',l:'4',d:'1',pct:'33.33'},
+    {team:'🇧🇩 Bangladesch',m:'5',w:'2',l:'3',d:'0',pct:'40.00'},
+    {team:'🇼🇸 West Indies',m:'6',w:'0',l:'6',d:'0',pct:'0.00'},
+  ];
+  document.getElementById('wtc-table').innerHTML = standingsTable(wtcTable,'pct','PCT%','var(--p1)');
+
+  // WTC Schedule
+  document.getElementById('wtc-schedule').innerHTML = [
+    {t1:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',t2:'🇳🇿 Neuseeland',d:'2026-06-04',v:"Lord's",f:'Test 1 · WTC'},
+    {t1:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',t2:'🇳🇿 Neuseeland',d:'2026-06-17',v:'The Oval',f:'Test 2 · WTC'},
+    {t1:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',t2:'🇳🇿 Neuseeland',d:'2026-06-25',v:'Trent Bridge',f:'Test 3 · WTC'},
+    {t1:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',t2:'🇮🇳 Indien',d:'2026-07-02',v:"Lord's",f:'Test 1 · WTC'},
+    {t1:'🏴󠁧󠁢󠁥󠁮󠁧󠁿 England',t2:'🇮🇳 Indien',d:'2026-07-16',v:'Headingley',f:'Test 2 · WTC'},
+    {t1:'🇱🇰 Sri Lanka',t2:'🇮🇳 Indien',d:'2026-08-15',v:'Colombo',f:'Test 1 · WTC'},
+  ].map(u=>fixtureRow(u.t1,u.t2,u.d,'',u.v,u.f)).join('');
+
+  document.getElementById('wtc-info').innerHTML = `
+    <div class="cr"><div><div class="ce">🏆 Finale</div><div class="cm">Juni 2027 · Lord's Cricket Ground, London</div></div><span class="cst soon">Jun 2027</span></div>
+    <div class="cr"><div><div class="ce">Qualifikation</div><div class="cm">Top 2 Teams nach PCT-Wertung qualifizieren sich</div></div><span class="cst done">Laufend</span></div>
+    <div class="cr"><div><div class="ce">Punkte</div><div class="cm">12 Pkt Sieg · 6 Pkt Remis · 0 Pkt Niederlage</div></div><span class="cst done">System</span></div>
+    <div class="cr"><div><div class="ce">Titelverteidiger</div><div class="cm">🇿🇦 Südafrika (WTC 2023–25 Sieger)</div></div><span class="cst done">Champion</span></div>
+    <div class="cr"><div><div class="ce">Vorheriger Finalist</div><div class="cm">🇦🇺 Australien – verloren gegen RSA in Colombo</div></div><span class="cst done">2025 Final</span></div>`;
+}
+
+function loadT20WC() {
+  document.getElementById('t20wc-result').innerHTML = `
+    <div class="rnd-hdr p2">🏆 SIEGER: INDIEN · 7. MÄR 2026 · MUMBAI</div>
+    ${matchRow('🇮🇳 Indien','176/6 (20)','🇿🇦 Südafrika','170/8 (20)','Indien gewinnt um 6 Punkte','Wankhede Stadium, Mumbai','2026-03-07','T20 WC Finale')}
+    <div style="padding:10px 14px;font-size:11px;color:var(--muted);border-top:1px solid var(--border);">
+      Player of the Tournament: Suryakumar Yadav (IND) · Top Wicket-Taker: Rashid Khan (AFG) · 16 Teams · 7. Feb – 7. Mär 2026 · Indien & Sri Lanka
+    </div>`;
+
+  // Groups
+  document.getElementById('t20wc-groups').innerHTML = `
+    <div class="rnd-hdr p2">GROUP A</div>
+    <div style="padding:8px 14px;font-size:12px;color:var(--text);">🇮🇳 Indien · 🇵🇰 Pakistan · 🇳🇱 Niederlande · 🇺🇸 USA · 🇳🇦 Namibia</div>
+    <div class="rnd-hdr p2">GROUP B</div>
+    <div style="padding:8px 14px;font-size:12px;color:var(--text);">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England · 🇦🇺 Australien · 🇦🇫 Afghanistan · 🇸🇨 Schottland · 🇴🇲 Oman</div>
+    <div class="rnd-hdr p2">GROUP C</div>
+    <div style="padding:8px 14px;font-size:12px;color:var(--text);">🇳🇿 Neuseeland · 🇱🇰 Sri Lanka · 🇧🇩 Bangladesch · 🇨🇦 Kanada · 🇵🇬 PNG</div>
+    <div class="rnd-hdr p2">GROUP D</div>
+    <div style="padding:8px 14px;font-size:12px;color:var(--text);">🇿🇦 Südafrika · 🇼🇸 West Indies · 🇮🇪 Irland · 🇿🇼 Zimbabwe · 🇺🇬 Uganda</div>`;
+
+  document.getElementById('t20wc-knockout').innerHTML = `
+    <div class="rnd-hdr p2">HALBFINALE</div>
+    ${matchRow('🇮🇳 Indien','182/5','🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','167/8','Indien gewinnt um 15 Runs','Eden Gardens, Kolkata','2026-03-05','SF1')}
+    ${matchRow('🇿🇦 Südafrika','165/7','🇳🇿 Neuseeland','162/9','Südafrika gewinnt um 3 Runs','Premadasa, Colombo','2026-03-05','SF2')}
+    <div class="rnd-hdr p2">🏆 FINALE · 7. MÄR 2026 · MUMBAI</div>
+    ${matchRow('🇮🇳 Indien','176/6','🇿🇦 Südafrika','170/8','Indien gewinnt um 6 Runs','Wankhede Stadium','2026-03-07','Final')}`;
+}
+
+function loadEngSummer() {
+  document.getElementById('eng-tests').innerHTML = `
+    <div class="rnd-hdr p1">VS NEUSEELAND · CROWE-THORPE TROPHY</div>
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇳🇿 Neuseeland','2026-06-04','10:00',"Lord's",'1. Test 🔴LIVE')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇳🇿 Neuseeland','2026-06-17','10:00','The Oval','2. Test')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇳🇿 Neuseeland','2026-06-25','10:00','Trent Bridge','3. Test')}
+    <div class="rnd-hdr p1">VS INDIEN · 3 TESTS</div>
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇮🇳 Indien','2026-07-02','10:00',"Lord's",'1. Test')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇮🇳 Indien','2026-07-16','10:00','Headingley','2. Test')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇮🇳 Indien','2026-07-30','10:00','Edgbaston','3. Test')}
+    <div class="rnd-hdr p1">VS PAKISTAN · 3 TESTS</div>
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇵🇰 Pakistan','2026-08-13','10:00',"Lord's",'1. Test')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇵🇰 Pakistan','2026-08-21','10:00','Headingley','2. Test')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇵🇰 Pakistan','2026-08-29','10:00','The Oval','3. Test')}`;
+
+  document.getElementById('eng-whiteball').innerHTML = `
+    <div class="rnd-hdr p2">VS INDIEN · T20I SERIES</div>
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇮🇳 Indien','2026-07-01','18:30','Edgbaston','1. T20I')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇮🇳 Indien','2026-07-03','18:30','The Oval','2. T20I')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇮🇳 Indien','2026-07-07','18:30','Trent Bridge','3. T20I')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇮🇳 Indien','2026-07-09','18:30','Headingley','4. T20I')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇮🇳 Indien','2026-07-12','18:30',"Lord's",'5. T20I')}
+    <div class="rnd-hdr p2">VS INDIEN · ODI SERIES</div>
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇮🇳 Indien','2026-07-15','13:00','Bristol','1. ODI')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇮🇳 Indien','2026-07-18','13:00','Cardiff','2. ODI')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇮🇳 Indien','2026-07-21','13:00',"Lord's",'3. ODI')}
+    <div class="rnd-hdr p2">VS SRI LANKA · T20I & ODI</div>
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇱🇰 Sri Lanka','2026-09-05','18:30','Cardiff','1. T20I')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇱🇰 Sri Lanka','2026-09-07','18:30','Bristol','2. T20I')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇱🇰 Sri Lanka','2026-09-10','13:00','The Oval','1. ODI')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇱🇰 Sri Lanka','2026-09-13','13:00','Edgbaston','2. ODI')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇱🇰 Sri Lanka','2026-09-16','13:00','Trent Bridge','3. ODI')}`;
+}
+
+function loadIPL() {
+  const iplTable = [
+    {team:'🏏 Mumbai Indians',m:'14',w:'10',l:'4',d:'0',pct:'71'},
+    {team:'🏏 Chennai Super Kings',m:'14',w:'9',l:'5',d:'0',pct:'64'},
+    {team:'🏏 Kolkata Knight Riders',m:'14',w:'8',l:'6',d:'0',pct:'57'},
+    {team:'🏏 Royal Challengers Bengaluru',m:'14',w:'8',l:'6',d:'0',pct:'57'},
+    {team:'🏏 Sunrisers Hyderabad',m:'14',w:'7',l:'7',d:'0',pct:'50'},
+    {team:'🏏 Delhi Capitals',m:'14',w:'6',l:'8',d:'0',pct:'43'},
+    {team:'🏏 Punjab Kings',m:'14',w:'5',l:'9',d:'0',pct:'36'},
+    {team:'🏏 Rajasthan Royals',m:'14',w:'4',l:'10',d:'0',pct:'29'},
+  ];
+  document.getElementById('ipl-table').innerHTML = standingsTable(iplTable,'pct','W%','var(--p3)');
+  document.getElementById('ipl-date').textContent = 'Abschluss: 1. Jun 2026';
+  document.getElementById('ipl-knockout').innerHTML = `
+    <div class="rnd-hdr p3">QUALIFIER 1</div>
+    ${matchRow('🏏 Mumbai Indians','172/6','🏏 Chennai Super Kings','168/9','Mumbai Indians gewinnen um 4 Runs','Wankhede Stadium','2026-05-24','IPL')}
+    <div class="rnd-hdr p3">ELIMINATOR</div>
+    ${matchRow('🏏 Kolkata Knight Riders','185/4','🏏 RCB','177/7','KKR gewinnen um 8 Runs','Eden Gardens','2026-05-24','IPL')}
+    <div class="rnd-hdr p3">QUALIFIER 2</div>
+    ${matchRow('🏏 Chennai Super Kings','196/5','🏏 KKR','181/8','CSK gewinnen um 15 Runs','Chepauk','2026-05-27','IPL')}
+    <div class="rnd-hdr p3">🏆 FINALE · 1. JUN 2026</div>
+    ${matchRow('🏏 Mumbai Indians','183/5','🏏 Chennai Super Kings','177/8','Mumbai Indians gewinnen um 6 Runs','Narendra Modi Stadium, Ahmedabad','2026-06-01','IPL Final')}`;
+  document.getElementById('ipl-info').innerHTML = `
+    <div class="cr"><div><div class="ce">🏆 IPL 2026 Sieger</div><div class="cm">Mumbai Indians – 6. Titel</div></div><span class="cst done">Abgeschlossen</span></div>
+    <div class="cr"><div><div class="ce">Orange Cap (Most Runs)</div><div class="cm">Virat Kohli (RCB) · 652 Runs</div></div></div>
+    <div class="cr"><div><div class="ce">Purple Cap (Most Wickets)</div><div class="cm">Jasprit Bumrah (MI) · 24 Wickets</div></div></div>
+    <div class="cr"><div><div class="ce">Player of the Tournament</div><div class="cm">Jasprit Bumrah (Mumbai Indians)</div></div></div>`;
+}
+
+function loadHundred() {
+  document.getElementById('hundred-date').textContent = 'Start: 24. Jul 2026';
+  const hundredTable = [
+    {team:'🏏 London Spirit',m:'0',w:'0',l:'0',d:'0',pct:'–'},
+    {team:'🏏 Oval Invincibles',m:'0',w:'0',l:'0',d:'0',pct:'–'},
+    {team:'🏏 Birmingham Phoenix',m:'0',w:'0',l:'0',d:'0',pct:'–'},
+    {team:'🏏 Manchester Originals',m:'0',w:'0',l:'0',d:'0',pct:'–'},
+    {team:'🏏 Northern Superchargers',m:'0',w:'0',l:'0',d:'0',pct:'–'},
+    {team:'🏏 Trent Rockets',m:'0',w:'0',l:'0',d:'0',pct:'–'},
+    {team:'🏏 Welsh Fire',m:'0',w:'0',l:'0',d:'0',pct:'–'},
+    {team:'🏏 Southern Brave',m:'0',w:'0',l:'0',d:'0',pct:'–'},
+  ];
+  document.getElementById('hundred-table').innerHTML = standingsTable(hundredTable,'pct','Pkt','var(--p3)');
+  document.getElementById('hundred-fixtures').innerHTML = `
+    <div class="cr" style="padding:12px 14px;"><div><div class="ce">📅 Saison 2026 noch nicht begonnen</div><div class="cm">Start: 24. Juli 2026 · Finals Day: 30. August 2026</div></div><span class="cst soon">24. Jul 2026</span></div>
+    ${fixtureRow('🏏 Oval Invincibles','🏏 London Spirit','2026-07-24','18:35',"The Oval",'The Hundred · Eröffnung')}`;
+  document.getElementById('hundred-results').innerHTML = `<div class="empty">Saison beginnt am 24. Juli 2026</div>`;
+}
+
+// =================== SECTION LOADER ===================
+async function loadSection(id) {
+  switch(id) {
+    case 'testOverview': loadTestOverview(); break;
+    case 'engNZ2026': loadEngNZ(); break;
+    case 'wtc': loadWTC(); break;
+    case 't20wc2026': loadT20WC(); break;
+    case 'engSummer': loadEngSummer(); break;
+    case 'ipl2026': loadIPL(); break;
+    case 'thehundred': loadHundred(); break;
+  }
+}
+
+// =================== MAIN LOAD ===================
+async function loadAll() {
+  const btn = document.getElementById('refBtn');
+  const icon = document.getElementById('refIcon');
+  btn.classList.add('loading');
+  icon.classList.add('spin');
+  window.loaded = {};
+
+  const now = new Date();
+  document.getElementById('upd').textContent = 'Aktualisiert: ' + now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('ftrTime').textContent = now.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' · ' + now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+
+  const hash = window.location.hash.replace('#','');
+  const valid = ['testOverview','engNZ2026','wtc','t20wc2026','engSummer','ipl2026','thehundred'];
+  const start = valid.includes(hash) ? hash : 'testOverview';
+
+  await loadSection(start);
+  window.loaded = {[start]: true};
+
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const tb = document.querySelector(`.ptab[data-sec="${start}"]`);
+  if (tb) tb.classList.add('active');
+  const sec = document.getElementById('sec-' + start);
+  if (sec) sec.classList.add('active');
+
+  // Flag rendering
+  renderFlags(document.getElementById('sec-' + start) || document.body);
+
+  btn.classList.remove('loading');
+  icon.classList.remove('spin');
+}
+
+// =================== FLAGS ===================
+const FLAG_MAP = {
+  '🏴󠁧󠁢󠁥󠁮󠁧󠁿':'gb-eng','🏴󠁧󠁢󠁳󠁣󠁴󠁿':'gb-sct','🏴󠁧󠁢󠁷󠁬󠁳󠁿':'gb-wls',
+  '🇦🇺':'au','🇮🇳':'in','🇵🇰':'pk','🇳🇿':'nz','🇿🇦':'za','🇱🇰':'lk',
+  '🇧🇩':'bd','🇼🇸':'ws','🇿🇼':'zw','🇦🇫':'af','🇮🇪':'ie','🇨🇦':'ca',
+  '🇺🇸':'us','🇳🇱':'nl','🇳🇦':'na','🇺🇬':'ug','🇴🇲':'om','🇵🇬':'pg',
+  '🇸🇨':'gb-sct','🇱🇨':'lc',
+};
+function flagImg(code){return `<img class="flag-img" src="https://flagcdn.com/w40/${code}.png" alt="">`;}
+function renderFlags(el) {
+  if (!el) return;
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+  const nodes = []; let node;
+  while (node = walker.nextNode()) nodes.push(node);
+  nodes.forEach(n => {
+    let txt = n.textContent, changed = false;
+    for (const [emoji, code] of Object.entries(FLAG_MAP)) {
+      if (txt.includes(emoji)) { txt = txt.split(emoji).join(`%%FLAG:${code}%%`); changed = true; }
+    }
+    if (changed) {
+      const span = document.createElement('span');
+      span.innerHTML = txt.replace(/%%FLAG:([a-z-]+)%%/g, (_,c) => flagImg(c));
+      n.parentNode.replaceChild(span, n);
+    }
+  });
+}
+const flagObserver = new MutationObserver(mutations => {
+  mutations.forEach(m => m.addedNodes.forEach(node => {
+    if (node.nodeType === 1) renderFlags(node);
+  }));
+});
+flagObserver.observe(document.body, {childList:true, subtree:true});
+
+// =================== GITHUB ===================
+const GH_REPO = 'l10john/sport-dashboard';
+const GH_FILE = 'cricket.html';
+function showGHButton() { const b=document.getElementById('ghBtn'); if(b) b.style.display='flex'; }
+async function pushToGitHub() {
+  const btn=document.getElementById('ghBtn');
+  let pat=localStorage.getItem('gh_token');
+  if(!pat){pat=prompt('GitHub PAT:');if(!pat)return;localStorage.setItem('gh_token',pat.trim());pat=pat.trim();}
+  btn.style.opacity='.4';btn.style.pointerEvents='none';
+  try{
+    const res=await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`,{headers:{Authorization:`token ${pat}`,Accept:'application/vnd.github.v3+json'}});
+    const data=await res.json();
+    if(!data.sha)throw new Error('SHA nicht gefunden');
+    const push=await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`,{method:'PUT',headers:{Authorization:`token ${pat}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message:'Cricket Dashboard update',content:btoa(unescape(encodeURIComponent(document.documentElement.outerHTML))),sha:data.sha})});
+    if(push.ok){btn.style.background='rgba(58,245,160,.15)';btn.style.color='var(--win)';btn.title='✓ Gepusht!';setTimeout(()=>{btn.style.display='none';btn.style.cssText='';btn.title='Update auf GitHub';},3000);}
+    else{alert('Fehler: '+(await push.json()).message);if(push.status===401)localStorage.removeItem('gh_token');}
+  }catch(e){alert('Fehler: '+e.message);}
+  btn.style.opacity='';btn.style.pointerEvents='';
+}
+
+// Auto-start
+document.addEventListener('DOMContentLoaded', () => loadAll());
+</script>
+</body>
+</html>
