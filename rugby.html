@@ -938,7 +938,7 @@ function loadRWCQuali() {
 }
 
 // =================== SVNS (static 2024/25) ===================
-// =================== SVNS 2024/25 ===================
+// =================== SVNS 2025/26 ===================
 // Accordion CSS (injected once)
 if (!document.getElementById('accordion-style')) {
   const s = document.createElement('style');
@@ -956,74 +956,48 @@ function toggleAcc(id) {
 }
 
 function loadSVNS() {
-  // Men's standings only
+  // 2025/26 SVNS Series XXVII - stand nach Valladolid, Grand Final Bordeaux 5-7 Jun 2026
   const menStandings = [
-    {intRank:1,strTeam:'🇦🇷 Argentinien',intPlayed:'7',intWin:'3',intDraw:'2',intLoss:'1',intPoints:'104'},
-    {intRank:2,strTeam:'🇫🇯 Fidschi',intPlayed:'7',intWin:'2',intDraw:'0',intLoss:'1',intPoints:'96'},
-    {intRank:3,strTeam:'🇪🇸 Spanien',intPlayed:'7',intWin:'0',intDraw:'2',intLoss:'3',intPoints:'88'},
-    {intRank:4,strTeam:'🇿🇦 Südafrika',intPlayed:'7',intWin:'2',intDraw:'1',intLoss:'0',intPoints:'70'},
-    {intRank:5,strTeam:'🇫🇷 Frankreich',intPlayed:'7',intWin:'0',intDraw:'2',intLoss:'0',intPoints:'65'},
-    {intRank:6,strTeam:'🇦🇺 Australien',intPlayed:'7',intWin:'0',intDraw:'1',intLoss:'1',intPoints:'57'},
-    {intRank:7,strTeam:'🇳🇿 Neuseeland',intPlayed:'7',intWin:'0',intDraw:'0',intLoss:'1',intPoints:'56'},
-    {intRank:8,strTeam:'🇬🇧 Great Britain',intPlayed:'7',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'50'},
-    {intRank:9,strTeam:'🇰🇪 Kenia',intPlayed:'7',intWin:'0',intDraw:'1',intLoss:'0',intPoints:'36'},
-    {intRank:10,strTeam:'🇺🇾 Uruguay',intPlayed:'7',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'27'},
-    {intRank:11,strTeam:'🇮🇪 Irland',intPlayed:'7',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'23'},
-    {intRank:12,strTeam:'🇺🇸 USA',intPlayed:'7',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'12'},
+    {intRank:1,strTeam:'🇿🇦 Südafrika',intPlayed:'2',intWin:'1',intDraw:'0',intLoss:'0',intPoints:'38'},
+    {intRank:2,strTeam:'🇦🇷 Argentinien',intPlayed:'2',intWin:'1',intDraw:'0',intLoss:'0',intPoints:'34'},
+    {intRank:3,strTeam:'🇦🇺 Australien',intPlayed:'2',intWin:'1',intDraw:'0',intLoss:'0',intPoints:'30'},
+    {intRank:4,strTeam:'🇫🇯 Fidschi',intPlayed:'2',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'26'},
+    {intRank:5,strTeam:'🇪🇸 Spanien',intPlayed:'2',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'26'},
+    {intRank:6,strTeam:'🇳🇿 Neuseeland',intPlayed:'2',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'26'},
+    {intRank:7,strTeam:'🇫🇷 Frankreich',intPlayed:'2',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'14'},
+    {intRank:8,strTeam:'🇰🇪 Kenia',intPlayed:'2',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'14'},
+    {intRank:9,strTeam:'🇺🇾 Uruguay',intPlayed:'2',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'6'},
+    {intRank:10,strTeam:'🇩🇪 Deutschland',intPlayed:'2',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'5'},
+    {intRank:11,strTeam:'🇺🇸 USA',intPlayed:'2',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'5'},
+    {intRank:12,strTeam:'🇬🇧 Great Britain',intPlayed:'2',intWin:'0',intDraw:'0',intLoss:'0',intPoints:'4'},
   ];
   document.getElementById('svns-men').innerHTML =
-    '<div style="padding:5px 14px 3px;font-size:10px;font-family:\'DM Mono\',monospace;color:var(--p2);background:var(--bg3);border-bottom:1px solid var(--border);letter-spacing:.5px;">🏆 ABSCHLUSSTABELLE 2024/25</div>' +
-    standingsTable(menStandings,'var(--p2)', 12, ['#','Nation','Legs','🥇','🥈','🥉','Pkt']) +
-    '<div style="padding:10px 14px;font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;border-top:1px solid var(--border);">Top-Try-Scorer: Joji Nasova (🇫🇯) & Marcos Moneta (🇦🇷) · je 26</div>';
+    '<div style="padding:5px 14px 3px;font-size:10px;font-family:\'DM Mono\',monospace;color:var(--p2);background:var(--bg3);border-bottom:1px solid var(--border);letter-spacing:.5px;">🏆 SERIE XXVII · STAND NACH VALLADOLID · GRAND FINAL BORDEAUX 5–7 JUN</div>' +
+    standingsTable(menStandings, 'var(--p2)', 12, ['#','Nation','Events','🥇','🥈','🥉','Pkt']) +
+    '<div style="padding:10px 14px;font-size:11px;color:var(--muted);font-family:\'DM Mono\',monospace;border-top:1px solid var(--border);">RSA führt mit 4 Pkt Vorsprung auf ARG · Grand Final Bordeaux 5–7 Jun 2026 · Stade Atlantique</div>';
 
-  // All leg results with accordion
+  // Legs 2025/26
   const legs = [
-    {id:'leg1', label:'Leg 1 · Dubai · 30. Nov – 1. Dez 2024', winner:'🇫🇯 Fidschi', matches:[
-      {round:'HALBFINALE',home:'🇫🇯 Fidschi',away:'🇳🇿 Neuseeland',sh:'31',sa:'14',date:'2024-11-30'},
-      {round:'HALBFINALE',home:'🇪🇸 Spanien',away:'🇬🇧 Great Britain',sh:'21',sa:'7',date:'2024-11-30'},
-      {round:'SPIEL UM PLATZ 3',home:'🇳🇿 Neuseeland',away:'🇦🇷 Argentinien',sh:'14',sa:'0',date:'2024-12-01'},
-      {round:'🏆 FINALE',home:'🇫🇯 Fidschi',away:'🇪🇸 Spanien',sh:'17',sa:'5',date:'2024-12-01'},
+    {id:'s26leg1', label:'Leg 1 · Hong Kong · Apr 2026', winner:'🇿🇦 Südafrika', matches:[
+      {round:'HALBFINALE',home:'🇿🇦 Südafrika',away:'🇦🇷 Argentinien',sh:'14',sa:'7',date:'2026-04-05'},
+      {round:'HALBFINALE',home:'🇳🇿 Neuseeland',away:'🇦🇺 Australien',sh:'17',sa:'19',date:'2026-04-05'},
+      {round:'SPIEL UM PLATZ 3',home:'🇳🇿 Neuseeland',away:'🇦🇷 Argentinien',sh:'12',sa:'14',date:'2026-04-06'},
+      {round:'🏆 FINALE',home:'🇿🇦 Südafrika',away:'🇦🇺 Australien',sh:'21',sa:'10',date:'2026-04-06'},
     ]},
-    {id:'leg2', label:'Leg 2 · Cape Town · 7.–8. Dez 2024', winner:'🇿🇦 Südafrika', matches:[
-      {round:'HALBFINALE',home:'🇿🇦 Südafrika',away:'🇪🇸 Spanien',sh:'19',sa:'12',date:'2024-12-08'},
-      {round:'HALBFINALE',home:'🇫🇷 Frankreich',away:'🇫🇯 Fidschi',sh:'19',sa:'17',date:'2024-12-08'},
-      {round:'SPIEL UM PLATZ 3',home:'🇫🇯 Fidschi',away:'🇪🇸 Spanien',sh:'24',sa:'7',date:'2024-12-08'},
-      {round:'🏆 FINALE',home:'🇿🇦 Südafrika',away:'🇫🇷 Frankreich',sh:'26',sa:'14',date:'2024-12-08'},
+    {id:'s26leg2', label:'Leg 2 · Valladolid · 29–31 Mai 2026', winner:'🇦🇺 Australien', matches:[
+      {round:'HALBFINALE',home:'🇦🇺 Australien',away:'🇿🇦 Südafrika',sh:'17',sa:'14',date:'2026-05-31'},
+      {round:'HALBFINALE',home:'🇦🇷 Argentinien',away:'🇳🇿 Neuseeland',sh:'21',sa:'17',date:'2026-05-31'},
+      {round:'SPIEL UM PLATZ 3',home:'🇿🇦 Südafrika',away:'🇳🇿 Neuseeland',sh:'19',sa:'14',date:'2026-05-31'},
+      {round:'🏆 FINALE',home:'🇦🇺 Australien',away:'🇦🇷 Argentinien',sh:'24',sa:'19',date:'2026-05-31'},
     ]},
-    {id:'leg3', label:'Leg 3 · Perth · 24.–26. Jan 2025', winner:'🇦🇷 Argentinien', matches:[
-      {round:'HALBFINALE',home:'🇦🇷 Argentinien',away:'🇪🇸 Spanien',sh:'40',sa:'5',date:'2025-01-26'},
-      {round:'HALBFINALE',home:'🇦🇺 Australien',away:'🇿🇦 Südafrika',sh:'17',sa:'12',date:'2025-01-26'},
-      {round:'SPIEL UM PLATZ 3',home:'🇪🇸 Spanien',away:'🇿🇦 Südafrika',sh:'14',sa:'7',date:'2025-01-26'},
-      {round:'🏆 FINALE',home:'🇦🇷 Argentinien',away:'🇦🇺 Australien',sh:'41',sa:'5',date:'2025-01-26'},
-    ]},
-    {id:'leg4', label:'Leg 4 · Vancouver · 21.–23. Feb 2025', winner:'🇦🇷 Argentinien', matches:[
-      {round:'HALBFINALE',home:'🇦🇷 Argentinien',away:'🇪🇸 Spanien',sh:'7',sa:'0',date:'2025-02-23'},
-      {round:'HALBFINALE',home:'🇿🇦 Südafrika',away:'🇫🇯 Fidschi',sh:'12',sa:'10',date:'2025-02-23'},
-      {round:'SPIEL UM PLATZ 3',home:'🇪🇸 Spanien',away:'🇫🇯 Fidschi',sh:'22',sa:'7',date:'2025-02-23'},
-      {round:'🏆 FINALE',home:'🇦🇷 Argentinien',away:'🇿🇦 Südafrika',sh:'19',sa:'12',date:'2025-02-23'},
-    ]},
-    {id:'leg5', label:'Leg 5 · Hong Kong · 28.–30. Mär 2025', winner:'🇦🇷 Argentinien', matches:[
-      {round:'HALBFINALE',home:'🇦🇷 Argentinien',away:'🇳🇿 Neuseeland',sh:'21',sa:'14',date:'2025-03-30'},
-      {round:'HALBFINALE',home:'🇿🇦 Südafrika',away:'🇫🇷 Frankreich',sh:'26',sa:'22',date:'2025-03-30'},
-      {round:'SPIEL UM PLATZ 3',home:'🇦🇺 Australien',away:'🇫🇯 Fidschi',sh:'22',sa:'21',date:'2025-03-30'},
-      {round:'🏆 FINALE',home:'🇦🇷 Argentinien',away:'🇫🇷 Frankreich',sh:'12',sa:'7',date:'2025-03-30'},
-    ]},
-    {id:'leg6', label:'Leg 6 · Singapore · 5.–6. Apr 2025', winner:'🇫🇯 Fidschi', matches:[
-      {round:'HALBFINALE',home:'🇦🇷 Argentinien',away:'🇫🇯 Fidschi',sh:'26',sa:'19',date:'2025-04-06'},
-      {round:'HALBFINALE',home:'🇪🇸 Spanien',away:'🇰🇪 Kenia',sh:'14',sa:'12',date:'2025-04-06'},
-      {round:'SPIEL UM PLATZ 3',home:'🇦🇷 Argentinien',away:'🇪🇸 Spanien',sh:'21',sa:'14',date:'2025-04-06'},
-      {round:'🏆 FINALE',home:'🇫🇯 Fidschi',away:'🇰🇪 Kenia',sh:'21',sa:'12',date:'2025-04-06'},
-    ]},
-    {id:'leg7', label:'🏆 Grand Final · Los Angeles · 3.–4. Mai 2025', winner:'🇿🇦 Südafrika', matches:[
-      {round:'HALBFINALE',home:'🇪🇸 Spanien',away:'🇦🇷 Argentinien',sh:'14',sa:'12',date:'2025-05-04'},
-      {round:'HALBFINALE',home:'🇿🇦 Südafrika',away:'🇳🇿 Neuseeland',sh:'19',sa:'14',date:'2025-05-04'},
-      {round:'SPIEL UM PLATZ 3',home:'🇳🇿 Neuseeland',away:'🇦🇷 Argentinien',sh:'38',sa:'17',date:'2025-05-04'},
-      {round:'🏆 FINALE',home:'🇿🇦 Südafrika',away:'🇪🇸 Spanien',sh:'19',sa:'5',date:'2025-05-04'},
+    {id:'s26leg3', label:'🏆 Grand Final · Bordeaux · 5–7 Jun 2026', winner:'Ausstehend', matches:[
+      {round:'GRAND FINAL · BORDEAUX',home:'Ausstehend',away:'–',sh:'–',sa:'–',date:'2026-06-07'},
     ]},
   ];
 
   let rHtml = '';
   legs.forEach(leg => {
+    const isPending = leg.winner === 'Ausstehend';
     rHtml += `<div class="acc-header" onclick="toggleAcc('${leg.id}')">
       <div>
         <div style="font-size:12px;font-weight:500;color:var(--text);">${leg.label}</div>
@@ -1032,23 +1006,27 @@ function loadSVNS() {
       <span class="acc-arrow" id="${leg.id}-arrow">▶</span>
     </div>
     <div class="acc-body" id="${leg.id}">
-      ${leg.matches.map(m => {
-        const roundHeader = m.round ? `<div style="padding:4px 14px 2px;font-size:10px;font-family:'DM Mono',monospace;color:var(--p2);background:var(--bg3);border-bottom:1px solid var(--border);letter-spacing:.5px;">${m.round}</div>` : '';
-        return roundHeader + matchRow(m.home, m.away, m.sh, m.sa, 'Match Finished', m.date, '');
-      }).join('')}
+      ${isPending
+        ? `<div class="cr" style="padding:10px 14px;"><div><div class="ce">⚡ Grand Final läuft – Bordeaux, Stade Atlantique</div><div class="cm">RSA (38 Pkt) vs ARG (34 Pkt) – entscheidet Weltmeister</div></div><span class="cst live"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--live);animation:pulse 1.2s ease-in-out infinite;margin-right:4px;vertical-align:middle;"></span>LIVE</span></div>`
+        : leg.matches.map(m => {
+          const roundHeader = m.round ? `<div style="padding:4px 14px 2px;font-size:10px;font-family:'DM Mono',monospace;color:var(--p2);background:var(--bg3);border-bottom:1px solid var(--border);letter-spacing:.5px;">${m.round}</div>` : '';
+          return roundHeader + matchRow(m.home, m.away, m.sh, m.sa, 'Match Finished', m.date, '');
+        }).join('')}
     </div>`;
   });
   document.getElementById('svns-results').innerHTML = rHtml;
 
-  // Calendar with winners
+  // Kalender 2025/26
   const calendar = [
-    {e:'Dubai Sevens',l:'Dubai, VAE',d:'2024-11-30',mw:'🇫🇯 Fidschi'},
-    {e:'Cape Town Sevens',l:'Kapstadt, RSA',d:'2024-12-07',mw:'🇿🇦 Südafrika'},
-    {e:'Perth Sevens',l:'Perth, AUS',d:'2025-01-24',mw:'🇦🇷 Argentinien'},
-    {e:'Vancouver Sevens',l:'Vancouver, CAN',d:'2025-02-21',mw:'🇦🇷 Argentinien'},
-    {e:'Hong Kong Sevens',l:'Hong Kong',d:'2025-03-28',mw:'🇦🇷 Argentinien'},
-    {e:'Singapore Sevens',l:'Singapur',d:'2025-04-05',mw:'🇫🇯 Fidschi'},
-    {e:'🏆 Grand Final LA',l:'Los Angeles, USA',d:'2025-05-03',mw:'🇿🇦 Südafrika'},
+    {e:'Dubai Sevens',l:'Dubai, VAE',d:'2025-11-29',mw:'–',s:'done'},
+    {e:'Cape Town Sevens',l:'Kapstadt, RSA',d:'2025-12-06',mw:'–',s:'done'},
+    {e:'Singapore Sevens',l:'Singapur',d:'2026-01-17',mw:'–',s:'done'},
+    {e:'Perth Sevens',l:'Perth, AUS',d:'2026-02-07',mw:'–',s:'done'},
+    {e:'Vancouver Sevens',l:'Vancouver, CAN',d:'2026-02-28',mw:'–',s:'done'},
+    {e:'New York Sevens',l:'New York, USA',d:'2026-03-21',mw:'–',s:'done'},
+    {e:'WC · Hong Kong Sevens',l:'Hong Kong',d:'2026-04-04',mw:'🇿🇦 Südafrika',s:'done'},
+    {e:'WC · Valladolid Sevens',l:'Valladolid, ESP',d:'2026-05-29',mw:'🇦🇺 Australien',s:'done'},
+    {e:'🏆 WC · Grand Final Bordeaux',l:'Bordeaux, FRA',d:'2026-06-05',mw:'Ausstehend',s:'live'},
   ];
   document.getElementById('svns-calendar').innerHTML = calendar.map(e => {
     const dt = new Date(e.d);
@@ -1056,9 +1034,9 @@ function loadSVNS() {
       <div>
         <div class="ce">${e.e}</div>
         <div class="cm">${e.l} · ${dt.toLocaleDateString('de-DE',{day:'2-digit',month:'short',year:'2-digit'})}</div>
-        <div class="cm" style="margin-top:2px;">🏆 ${e.mw}</div>
+        <div class="cm" style="margin-top:2px;">${e.mw !== '–' ? '🏆 ' + e.mw : ''}</div>
       </div>
-      <span class="cst done">✓</span>
+      <span class="cst ${e.s}">${e.s==='done'?'✓ Abgeschlossen':e.s==='live'?'⚡ LIVE':'Anstehend'}</span>
     </div>`;
   }).join('');
 }

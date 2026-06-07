@@ -209,7 +209,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <!-- TEST OVERVIEW -->
 <div class="main section active" id="sec-testOverview">
   <div class="banner">
-    <div class="tile"><div class="tl">LIVE JETZT</div><div class="tv" id="tb-live">1</div><div class="ts">ENG vs NZ · Lord's</div></div>
+    <div class="tile"><div class="tl">LIVE JETZT</div><div class="tv" id="tb-live">2</div><div class="ts">ENG vs NZ · WI vs SL</div></div>
     <div class="tile"><div class="tl">WTC LEADER</div><div class="tv" style="font-size:18px;padding-top:4px;">🇦🇺</div><div class="ts">Australien · 87.5%</div></div>
     <div class="tile"><div class="tl">ENG SUMMER</div><div class="tv" style="font-size:14px;padding-top:6px;">NZ·IND·PAK·SL</div><div class="ts">4 Gegner 2026</div></div>
     <div class="tile"><div class="tl">WTC FINALE</div><div class="tv" style="font-size:16px;padding-top:4px;">LORD'S</div><div class="ts">Juni 2027</div></div>
@@ -221,11 +221,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="ch"><div class="ct">🔴 LIVE – ENG vs NZ · Lord's</div><div class="cs">Crowe-Thorpe Trophy · 1. Test</div></div>
       <div id="live-match">
         <div class="mr">
-          <div class="mr-teams"><span class="mr-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</span><span class="mr-score">TBD</span></div>
-          <div class="mr-teams"><span class="mr-team">🇳🇿 Neuseeland</span><span class="mr-score">TBD</span></div>
-          <div class="mr-meta"><span class="live-badge"><span class="ldot"></span>LIVE · Day 1 · Lord's, London</span></div>
+          <div class="mr-teams"><span class="mr-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</span><span class="mr-score" style="color:var(--win)">140 &amp; 226</span></div>
+          <div class="mr-teams"><span class="mr-team">🇳🇿 Neuseeland</span><span class="mr-score" style="color:var(--loss)">113 &amp; 55/5 (21.3)</span></div>
+          <div class="mr-meta" style="margin-top:4px;"><span class="live-badge"><span class="ldot"></span>LIVE · Day 4 · NZ need 199 runs · Lord's</span></div>
+          <div class="mr-meta" style="margin-top:3px;color:var(--text)">Conway 19* · Blundell 2* · Robinson 2/18</div>
         </div>
-        <div class="rnd-hdr p1">SERIE: CROWE-THORPE TROPHY 2026 · ENG FÜHRT 0–0</div>
+        <div class="rnd-hdr p1">CROWE-THORPE TROPHY 2026 · ENG FÜHRT 1–0 (ERWARTET)</div>
         <div class="fr"><div class="fd"><div class="fd-d">4</div><div class="fd-m">JUN</div></div><div><div class="fm">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇳🇿 Neuseeland</div><div class="fc">1. Test · Lord's · 4.–8. Jun 2026</div></div></div>
         <div class="fr"><div class="fd"><div class="fd-d">17</div><div class="fd-m">JUN</div></div><div><div class="fm">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇳🇿 Neuseeland</div><div class="fc">2. Test · The Oval · 17.–21. Jun 2026</div></div></div>
         <div class="fr"><div class="fd"><div class="fd-d">25</div><div class="fd-m">JUN</div></div><div><div class="fm">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇳🇿 Neuseeland</div><div class="fc">3. Test · Trent Bridge · 25.–29. Jun 2026</div></div></div>
@@ -477,12 +478,31 @@ function loadEngNZ() {
     </div>`;
 
   document.getElementById('nz-results').innerHTML = `
-    <div class="rnd-hdr p1">1. TEST · LORD'S · 4.–8. JUN 2026</div>
+    <div class="rnd-hdr p1">1. TEST · LORD'S · 4.–8. JUN 2026 <span class="live-badge" style="float:right;"><span class="ldot"></span>LIVE · DAY 4</span></div>
     <div class="mr">
-      <div class="mr-teams"><span class="mr-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</span><span class="mr-score live-badge"><span class="ldot"></span>Läuft</span></div>
-      <div class="mr-teams"><span class="mr-team">🇳🇿 Neuseeland</span><span class="mr-score">–</span></div>
-      <div class="mr-meta">Day 1 · Live auf Sky Sports & TNT Sports</div>
-    </div>`;
+      <div class="mr-teams"><span class="mr-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England 1st Innings</span><span class="mr-score">140 (39.4 ov)</span></div>
+      <div class="mr-meta" style="padding-left:4px;color:var(--muted)">Brook 56 · Jamieson 5/62</div>
+    </div>
+    <div class="mr">
+      <div class="mr-teams"><span class="mr-team">🇳🇿 Neuseeland 1st Innings</span><span class="mr-score">113 (43.3 ov)</span></div>
+      <div class="mr-meta" style="padding-left:4px;color:var(--muted)">Robinson 5/39 · Jamieson 19</div>
+    </div>
+    <div class="mr">
+      <div class="mr-teams"><span class="mr-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England 2nd Innings</span><span class="mr-score">226 (56.0 ov)</span></div>
+      <div class="mr-meta" style="padding-left:4px;color:var(--muted)">Gay 57 · Smith 6/70</div>
+    </div>
+    <div class="mr">
+      <div class="mr-teams"><span class="mr-team" style="color:var(--live)">🇳🇿 Neuseeland 2nd Innings</span><span class="mr-score" style="color:var(--live)">55/5 (21.3 ov)</span></div>
+      <div class="mr-meta" style="padding-left:4px;"><span class="live-badge"><span class="ldot"></span>Conway 19* · Blundell 2*</span> NZ brauchen noch 199 Runs</div>
+    </div>
+    <div class="mr">
+      <div class="mr-teams"><span class="mr-team">Target</span><span class="mr-score" style="color:var(--p3)">254</span></div>
+      <div class="mr-meta" style="padding-left:4px;color:var(--muted)">Robinson 2/18 (9.3 ov) · Day 4 – 2 Tage verbleiben</div>
+    </div>
+    <div class="rnd-hdr p1">2. TEST · THE OVAL · 17.–21. JUN 2026</div>
+    <div class="mr"><div class="mr-meta" style="padding:4px 0;"><span class="cst soon">Anstehend</span></div></div>
+    <div class="rnd-hdr p1">3. TEST · TRENT BRIDGE · 25.–29. JUN 2026</div>
+    <div class="mr"><div class="mr-meta" style="padding:4px 0;"><span class="cst soon">Anstehend</span></div></div>`;
 
   document.getElementById('nz-fixtures').innerHTML = [
     {n:'1. Test',d:'2026-06-04',v:"Lord's, London",days:'4.–8. Jun'},
