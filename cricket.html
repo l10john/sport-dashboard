@@ -221,12 +221,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="ch"><div class="ct">🔴 LIVE – ENG vs NZ · Lord's</div><div class="cs">Crowe-Thorpe Trophy · 1. Test</div></div>
       <div id="live-match">
         <div class="mr">
-          <div class="mr-teams"><span class="mr-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</span><span class="mr-score" style="color:var(--win)">140 &amp; 226</span></div>
-          <div class="mr-teams"><span class="mr-team">🇳🇿 Neuseeland</span><span class="mr-score" style="color:var(--loss)">113 &amp; 55/5 (21.3)</span></div>
-          <div class="mr-meta" style="margin-top:4px;"><span class="live-badge"><span class="ldot"></span>LIVE · Day 4 · NZ need 199 runs · Lord's</span></div>
-          <div class="mr-meta" style="margin-top:3px;color:var(--text)">Conway 19* · Blundell 2* · Robinson 2/18</div>
+          <div class="mr-teams"><span class="mr-team w">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England</span><span class="mr-score" style="color:var(--win)">140 &amp; 226</span></div>
+          <div class="mr-teams"><span class="mr-team">🇳🇿 Neuseeland</span><span class="mr-score" style="color:var(--loss)">113 &amp; 181</span></div>
+          <div class="mr-meta" style="margin-top:4px;"><span style="background:rgba(58,245,160,.15);color:var(--win);padding:2px 8px;border-radius:4px;font-size:11px;">✓ England gewinnt um 72 Runs · Lord's</span></div>
+          <div class="mr-meta" style="margin-top:3px;color:var(--muted)">8. Juni 2026 · Serie: ENG 1–0 NZ</div>
         </div>
-        <div class="rnd-hdr p1">CROWE-THORPE TROPHY 2026 · ENG FÜHRT 1–0 (ERWARTET)</div>
+        <div class="rnd-hdr p1">CROWE-THORPE TROPHY 2026 · ENG FÜHRT 1–0</div>
         <div class="fr"><div class="fd"><div class="fd-d">4</div><div class="fd-m">JUN</div></div><div><div class="fm">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇳🇿 Neuseeland</div><div class="fc">1. Test · Lord's · 4.–8. Jun 2026</div></div></div>
         <div class="fr"><div class="fd"><div class="fd-d">17</div><div class="fd-m">JUN</div></div><div><div class="fm">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇳🇿 Neuseeland</div><div class="fc">2. Test · The Oval · 17.–21. Jun 2026</div></div></div>
         <div class="fr"><div class="fd"><div class="fd-d">25</div><div class="fd-m">JUN</div></div><div><div class="fm">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇳🇿 Neuseeland</div><div class="fc">3. Test · Trent Bridge · 25.–29. Jun 2026</div></div></div>
@@ -264,7 +264,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="sh" style="margin-top:0;"><div class="sh-title"><span class="sh-dot"></span> Crowe-Thorpe Trophy 2026 <span class="prio-badge p1">P1</span></div><a class="sh-link" href="https://www.espncricinfo.com/series/new-zealand-in-england-2026-1496491" target="_blank">espncricinfo.com ↗</a></div>
   <div class="g2">
     <div class="card p1-accent">
-      <div class="ch"><div class="ct">Serie – 3 Tests</div><div class="cs" id="nz-series-status">🔴 LIVE · Test 1 läuft</div></div>
+      <div class="ch"><div class="ct">Serie – 3 Tests</div><div class="cs" id="nz-series-status">🏴󠁧󠁢󠁥󠁮󠁧󠁿 ENG führt 1–0 · Test 2 ab 17. Jun</div></div>
       <div id="nz-series"></div>
     </div>
     <div class="card p1-accent">
@@ -430,9 +430,101 @@ function standingsTable(rows, ptsKey='pct', ptsLabel='PCT%', ptsColor='var(--p1)
   </table></div>`;
 }
 
+// =================== LIVE DATA VIA THESPORTSDB ===================
+const TSDB = 'https://www.thesportsdb.com/api/v1/json/3';
+const CRICKET_LEAGUES = {
+  testInternational: '4619',
+  odi: '4620',
+  t20i: '4621',
+  ipl: '4716',
+  thehundred: '4943',
+};
+
+async function fetchTSDB(path) {
+  try {
+    const r = await fetch(`${TSDB}/${path}`);
+    if (!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch(e) { return null; }
+}
+
+// Fetch live/recent cricket matches from TheSportsDB
+async function fetchLiveCricket() {
+  const today = new Date().toISOString().split('T')[0];
+  const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0];
+
+  // Try today and yesterday for recent matches
+  const [todayData, ydayData] = await Promise.all([
+    fetchTSDB(`eventsday.php?d=${today}&s=Cricket`),
+    fetchTSDB(`eventsday.php?d=${yesterday}&s=Cricket`),
+  ]);
+
+  const allEvents = [
+    ...(todayData?.events || []),
+    ...(ydayData?.events || []),
+  ];
+
+  return allEvents;
+}
+
+// Render a cricket match from TSDB data
+function renderTSDBMatch(e) {
+  const isLive = e.strStatus && /progress|live|day/i.test(e.strStatus);
+  const isDone = e.strStatus === 'Match Finished' || (e.intHomeScore && e.intAwayScore);
+  const home = e.strHomeTeam || '–';
+  const away = e.strAwayTeam || '–';
+  const scoreH = e.intHomeScore || (e.strResult ? '' : '–');
+  const scoreA = e.intAwayScore || '–';
+  return `<div class="mr">
+    <div class="mr-teams">
+      <span class="mr-team ${isDone && parseInt(e.intHomeScore) > parseInt(e.intAwayScore) ? 'w' : ''}">${home}</span>
+      <span class="mr-score">${scoreH}</span>
+    </div>
+    <div class="mr-teams">
+      <span class="mr-team ${isDone && parseInt(e.intAwayScore) > parseInt(e.intHomeScore) ? 'w' : ''}">${away}</span>
+      <span class="mr-score">${scoreA}</span>
+    </div>
+    <div class="mr-meta">
+      ${isLive ? '<span class="live-badge"><span class="ldot"></span>LIVE</span> · ' : ''}
+      ${e.strVenue || ''} · ${e.dateEvent ? new Date(e.dateEvent).toLocaleDateString('de-DE',{day:'2-digit',month:'short'}) : ''}
+      ${e.strResult ? ` · <span class="mr-result">${e.strResult}</span>` : ''}
+    </div>
+  </div>`;
+}
+
 // =================== DATA ===================
 
-function loadTestOverview() {
+async function loadTestOverview() {
+  // Try to load live matches from TheSportsDB
+  const liveEl = document.getElementById('live-match');
+  const rankingsEl = document.getElementById('testRankings');
+
+  // Fetch live cricket
+  const events = await fetchLiveCricket();
+  const testMatches = events.filter(e =>
+    e.strLeague && /test|international/i.test(e.strLeague)
+  );
+  const liveMatches = events.filter(e =>
+    e.strStatus && /progress|live|day/i.test(e.strStatus)
+  );
+
+  // Update live banner count
+  const liveCount = document.getElementById('tb-live');
+  if (liveCount) liveCount.textContent = liveMatches.length || '?';
+
+  // Show live/recent matches if API returns data
+  if (testMatches.length > 0) {
+    const container = document.createElement('div');
+    testMatches.slice(0,4).forEach(e => {
+      container.innerHTML += renderTSDBMatch(e);
+    });
+    // Prepend to live-match div
+    const existingHeader = liveEl.querySelector('.rnd-hdr');
+    if (existingHeader) {
+      liveEl.insertBefore(container, existingHeader);
+    }
+  }
+
   // ICC Test Rankings (Stand Jun 2026)
   const rankings = [
     {pos:1,team:'🇦🇺 Australien',rating:'122'},
@@ -466,7 +558,24 @@ function loadTestOverview() {
   document.getElementById('upcomingTests').innerHTML = upcoming.map(u => fixtureRow(u.t1,u.t2,u.d,'10:00 BST',u.v,u.f)).join('');
 }
 
-function loadEngNZ() {
+async function loadEngNZ() {
+  // Try fetch live ENG vs NZ scores
+  const events = await fetchLiveCricket();
+  const nzTest = events.find(e =>
+    e.strHomeTeam && e.strAwayTeam &&
+    /(england|new zealand)/i.test(e.strHomeTeam) &&
+    /(england|new zealand)/i.test(e.strAwayTeam)
+  );
+
+  if (nzTest) {
+    const resultsEl = document.getElementById('nz-results');
+    if (resultsEl) {
+      resultsEl.innerHTML = '<div class="rnd-hdr p1">LIVE API DATA · ENG vs NZ</div>' +
+        renderTSDBMatch(nzTest) +
+        '<div class="rnd-hdr p1" style="margin-top:0;">STATISCHE DATEN (AKTUELL)</div>';
+    }
+  }
+
   // Serie Overview
   document.getElementById('nz-series').innerHTML = `
     <div class="rnd-hdr p1">CROWE-THORPE TROPHY 2026 · ENGLAND VS NEUSEELAND</div>
@@ -478,9 +587,9 @@ function loadEngNZ() {
     </div>`;
 
   document.getElementById('nz-results').innerHTML = `
-    <div class="rnd-hdr p1">1. TEST · LORD'S · 4.–8. JUN 2026 <span class="live-badge" style="float:right;"><span class="ldot"></span>LIVE · DAY 4</span></div>
+    <div class="rnd-hdr p1">1. TEST · LORD'S · 4.–8. JUN 2026 · <span style="color:var(--win)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 ENGLAND GEWINNT</span></div>
     <div class="mr">
-      <div class="mr-teams"><span class="mr-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England 1st Innings</span><span class="mr-score">140 (39.4 ov)</span></div>
+      <div class="mr-teams"><span class="mr-team w">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England 1st Innings</span><span class="mr-score">140 (39.4 ov)</span></div>
       <div class="mr-meta" style="padding-left:4px;color:var(--muted)">Brook 56 · Jamieson 5/62</div>
     </div>
     <div class="mr">
@@ -488,16 +597,16 @@ function loadEngNZ() {
       <div class="mr-meta" style="padding-left:4px;color:var(--muted)">Robinson 5/39 · Jamieson 19</div>
     </div>
     <div class="mr">
-      <div class="mr-teams"><span class="mr-team">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England 2nd Innings</span><span class="mr-score">226 (56.0 ov)</span></div>
+      <div class="mr-teams"><span class="mr-team w">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England 2nd Innings</span><span class="mr-score">226 (56.0 ov)</span></div>
       <div class="mr-meta" style="padding-left:4px;color:var(--muted)">Gay 57 · Smith 6/70</div>
     </div>
     <div class="mr">
-      <div class="mr-teams"><span class="mr-team" style="color:var(--live)">🇳🇿 Neuseeland 2nd Innings</span><span class="mr-score" style="color:var(--live)">55/5 (21.3 ov)</span></div>
-      <div class="mr-meta" style="padding-left:4px;"><span class="live-badge"><span class="ldot"></span>Conway 19* · Blundell 2*</span> NZ brauchen noch 199 Runs</div>
+      <div class="mr-teams"><span class="mr-team">🇳🇿 Neuseeland 2nd Innings</span><span class="mr-score" style="color:var(--loss)">181 (58.2 ov)</span></div>
+      <div class="mr-meta" style="padding-left:4px;color:var(--muted)">Conway 58 · Blundell 41 · Robinson 4/49 · Atkinson 3/41</div>
     </div>
     <div class="mr">
-      <div class="mr-teams"><span class="mr-team">Target</span><span class="mr-score" style="color:var(--p3)">254</span></div>
-      <div class="mr-meta" style="padding-left:4px;color:var(--muted)">Robinson 2/18 (9.3 ov) · Day 4 – 2 Tage verbleiben</div>
+      <div class="mr-teams"><span class="mr-team w" style="color:var(--win)">🏴󠁧󠁢󠁥󠁮󠁧󠁿 England gewinnt um 72 Runs</span></div>
+      <div class="mr-meta" style="padding-left:4px;"><span style="background:rgba(58,245,160,.15);color:var(--win);padding:2px 8px;border-radius:4px;font-size:11px;">ABGESCHLOSSEN · 8. Jun 2026</span> · ENG führt Serie 1–0</div>
     </div>
     <div class="rnd-hdr p1">2. TEST · THE OVAL · 17.–21. JUN 2026</div>
     <div class="mr"><div class="mr-meta" style="padding:4px 0;"><span class="cst soon">Anstehend</span></div></div>
@@ -591,7 +700,7 @@ function loadT20WC() {
 function loadEngSummer() {
   document.getElementById('eng-tests').innerHTML = `
     <div class="rnd-hdr p1">VS NEUSEELAND · CROWE-THORPE TROPHY</div>
-    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇳🇿 Neuseeland','2026-06-04','10:00',"Lord's",'1. Test 🔴LIVE')}
+    ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇳🇿 Neuseeland','2026-06-04','10:00',"Lord's",'1. Test ✓ ENG won by 72 runs')}
     ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇳🇿 Neuseeland','2026-06-17','10:00','The Oval','2. Test')}
     ${fixtureRow('🏴󠁧󠁢󠁥󠁮󠁧󠁿 England','🇳🇿 Neuseeland','2026-06-25','10:00','Trent Bridge','3. Test')}
     <div class="rnd-hdr p1">VS INDIEN · 3 TESTS</div>
@@ -673,8 +782,8 @@ function loadHundred() {
 // =================== SECTION LOADER ===================
 async function loadSection(id) {
   switch(id) {
-    case 'testOverview': loadTestOverview(); break;
-    case 'engNZ2026': loadEngNZ(); break;
+    case 'testOverview': await loadTestOverview(); break;
+    case 'engNZ2026': await loadEngNZ(); break;
     case 'wtc': loadWTC(); break;
     case 't20wc2026': loadT20WC(); break;
     case 'engSummer': loadEngSummer(); break;
@@ -683,22 +792,129 @@ async function loadSection(id) {
   }
 }
 
+// =================== CLAUDE API LIVE UPDATE ===================
+async function fetchLiveScoresViaClaude() {
+  const today = new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+  const prompt = `Du bist ein Cricket-Score-Bot. Heute ist ${today}.
+Liefere die aktuellen Cricket-Scores und Ergebnisse der letzten 48 Stunden als kompaktes JSON.
+Format:
+{
+  "liveMatches": [
+    {"teams": "ENG vs NZ", "score1": "ENG 280/4 (72 ov)", "score2": "NZ 113", "status": "ENG lead by 167 runs - Day 2", "venue": "The Oval", "format": "Test"}
+  ],
+  "recentResults": [
+    {"teams": "ENG vs NZ", "result": "England won by 72 runs", "score1": "140 & 226", "score2": "113 & 181", "venue": "Lord's", "date": "8 Jun 2026", "format": "1st Test"}
+  ],
+  "upcomingNext": [
+    {"teams": "ENG vs NZ", "date": "17 Jun 2026", "venue": "The Oval", "format": "2nd Test"}
+  ]
+}
+Antworte NUR mit dem JSON-Objekt, kein weiterer Text.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    // Extract text content
+    const textBlock = data.content?.find(b => b.type === 'text');
+    if (!textBlock) return null;
+    // Clean and parse JSON
+    const clean = textBlock.text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch(e) {
+    console.warn('Claude API fetch failed:', e);
+    return null;
+  }
+}
+
+function renderLiveScores(data) {
+  if (!data) return;
+
+  // Update live matches in testOverview
+  const liveEl = document.getElementById('live-match');
+  if (liveEl && data.liveMatches && data.liveMatches.length > 0) {
+    const liveHtml = data.liveMatches.map(m => `
+      <div class="mr">
+        <div class="mr-teams">
+          <span class="mr-team">${m.teams.split(' vs ')[0]}</span>
+          <span class="mr-score">${m.score1 || '–'}</span>
+        </div>
+        <div class="mr-teams">
+          <span class="mr-team">${m.teams.split(' vs ')[1] || ''}</span>
+          <span class="mr-score">${m.score2 || '–'}</span>
+        </div>
+        <div class="mr-meta">
+          <span class="live-badge"><span class="ldot"></span>${m.status}</span>
+          · ${m.venue} · ${m.format}
+        </div>
+      </div>`).join('');
+
+    // Update the live section header
+    const liveHdr = liveEl.querySelector('.ch');
+    if (liveHdr) {
+      liveHdr.querySelector('.ct').innerHTML = `🔴 LIVE – ${data.liveMatches[0].teams}`;
+      liveHdr.querySelector('.cs').textContent = data.liveMatches[0].format;
+    }
+    // Replace match rows but keep fixture rows
+    const firstRndHdr = liveEl.querySelector('.rnd-hdr');
+    if (firstRndHdr) {
+      // Insert before first rnd-hdr
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = liveHtml;
+      while(tempDiv.firstChild) liveEl.insertBefore(tempDiv.firstChild, firstRndHdr);
+    }
+  }
+
+  // Update banner live count
+  const liveCount = document.getElementById('tb-live');
+  if (liveCount) liveCount.textContent = data.liveMatches?.length || '0';
+
+  // Update recent results in engNZ section if loaded
+  if (data.recentResults && window.loaded?.engNZ2026) {
+    const resultsEl = document.getElementById('nz-results');
+    if (resultsEl) {
+      const resHtml = '<div class="rnd-hdr p1">🔄 LIVE-AKTUALISIERUNG · ' + new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) + '</div>' +
+        data.recentResults.map(r => `
+          <div class="mr">
+            <div class="mr-teams"><span class="mr-team">${r.teams.split(' vs ')[0]}</span><span class="mr-score">${r.score1||'–'}</span></div>
+            <div class="mr-teams"><span class="mr-team">${r.teams.split(' vs ')[1]||''}</span><span class="mr-score">${r.score2||'–'}</span></div>
+            <div class="mr-meta"><span class="mr-result">${r.result}</span> · ${r.venue} · ${r.date} · ${r.format}</div>
+          </div>`).join('');
+      resultsEl.insertAdjacentHTML('afterbegin', resHtml);
+    }
+  }
+
+  // Show update indicator
+  document.getElementById('upd').innerHTML =
+    '🔄 Claude Live-Update: ' + new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+}
+
 // =================== MAIN LOAD ===================
 async function loadAll() {
   const btn = document.getElementById('refBtn');
   const icon = document.getElementById('refIcon');
   btn.classList.add('loading');
   icon.classList.add('spin');
+  btn.querySelector('span') && (btn.querySelector('span').textContent = 'Lade...');
   window.loaded = {};
 
   const now = new Date();
-  document.getElementById('upd').textContent = 'Aktualisiert: ' + now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('upd').textContent = 'Wird aktualisiert...';
   document.getElementById('ftrTime').textContent = now.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' · ' + now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
 
   const hash = window.location.hash.replace('#','');
   const valid = ['testOverview','engNZ2026','wtc','t20wc2026','engSummer','ipl2026','thehundred'];
   const start = valid.includes(hash) ? hash : 'testOverview';
 
+  // Load static section first (instant)
   await loadSection(start);
   window.loaded = {[start]: true};
 
@@ -709,8 +925,16 @@ async function loadAll() {
   const sec = document.getElementById('sec-' + start);
   if (sec) sec.classList.add('active');
 
-  // Flag rendering
   renderFlags(document.getElementById('sec-' + start) || document.body);
+
+  // Then fetch live scores via Claude API (async, non-blocking)
+  document.getElementById('upd').textContent = '🔍 Suche aktuelle Scores...';
+  const liveData = await fetchLiveScoresViaClaude();
+  if (liveData) {
+    renderLiveScores(liveData);
+  } else {
+    document.getElementById('upd').textContent = 'Aktualisiert: ' + now.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  }
 
   btn.classList.remove('loading');
   icon.classList.remove('spin');
